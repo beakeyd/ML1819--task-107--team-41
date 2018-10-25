@@ -18,21 +18,21 @@ def main():
 
     allUsers = []
     newDict= {}
-    i = 0
+    i = 1
 
     with open('data/gender.json') as gender:
-            if i % 800 == 0:
-                with open('logs/log.txt', 'a') as log:
-                    log.write('waiting for 15 mins.')
-                    log.write("\n")
-                time.sleep(900)
-                with open('logs/log.txt', 'a') as log:
-                    log.write('waiting finished.')
-                    log.write("\n")
             data = json.load(gender)
             copy = dict(data)
             for key in data:
                 try:
+                    if i % 800 == 0:
+                        with open('logs/log.txt', 'a') as log:
+                            log.write('waiting for 15 mins.')
+                            log.write("\n")
+                        time.sleep(900)
+                        with open('logs/log.txt', 'a') as log:
+                            log.write('waiting finished.')
+                            log.write("\n")
                     i = i + 1
                     tmp = api.GetUser(key)
                     newDict['created_at'] = tmp.created_at
