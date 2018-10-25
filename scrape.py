@@ -52,6 +52,7 @@ def main():
                     newDict['tweet'] = tmp.status.text
                     newDict['gender'] = data[key]
                     allUsers.append(newDict)
+                    newDict = {}
                     if(i % 10 == 0):
                         with open('logs/log.txt', 'a') as log:
                             log.write(str(i))

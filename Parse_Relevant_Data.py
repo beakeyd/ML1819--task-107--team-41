@@ -51,6 +51,7 @@ def main():
                     newDict['screen_name'] = tmp.screen_name
                     newDict['tweet'] = tmp.status.text
                     newDict['gender'] = data[key]
+                    newDict = {}
                     allUsers.append(newDict)
                     if(i % 10 == 0):
                         with open('logs/log.txt', 'a') as log:

@@ -66,11 +66,10 @@ def plotFeatureData(X, actY, predY, graph_name):
     graph = 'plots/' + graph_name + '.png'    
     fig.savefig(graph)
 
-def validate(actY, predY):
+def getAccuracy(actY, predY):
     acc = reduce(lambda m, n: m+n, list(isPredictionCorrect, actY, predY))
     return (acc / len(actY))
         
-
 ''' 
     Models that ARE NOT doing text classification
 '''
@@ -131,7 +130,7 @@ def listed_count(listed_count):
 
     # make predicitions
     predY = [clf.predict(x) for x in X]
-    #plot data, get and return accuracy of model
+    # plot data, get and return accuracy of model
     plotFeatureData(X, y, predY, 'Listed_Count')
     return validate(X, y, predY)
 
