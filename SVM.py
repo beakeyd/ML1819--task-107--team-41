@@ -1,3 +1,7 @@
+try:
+    import json
+except ImportError:
+    import simplejson as json
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import svm
@@ -17,15 +21,17 @@ def main():
         screen_name = data[:, 'screen_name']
         gender = data[:, 'gender']
 
+
+
         # create models, plot and then get accuracy of models
         created_at_acc = created_at(created_at, gender)
         favourites_acc = favourites_count(favourites_count, gender)
         color_acc = color(color, gender)
         listed_acc = listed_count(listed_count, gender)
-        description_acc = description(description, gender)
-        tweet_acc = tweet(tweet, gender)
-        name_acc = name(name, gender)
-        screen_name_acc = screen_name(screen_name, gender)
+        #description_acc = description(description, gender)
+        #tweet_acc = tweet(tweet, gender)
+        #name_acc = name(name, gender)
+        #screen_name_acc = screen_name(screen_name, gender)
 
         plotAccuracy(created_at_acc, favourites_acc,
                      color_acc, listed_acc, description_acc,
@@ -69,7 +75,7 @@ def plotFeatureData(X, actY, predY, graph_name):
 def getAccuracy(actY, predY):
     acc = reduce(lambda m, n: m+n, list(isPredictionCorrect, actY, predY))
     return (acc / len(actY))
-        
+
 ''' 
     Models that ARE NOT doing text classification
 '''
@@ -138,10 +144,10 @@ def listed_count(listed_count):
     Models that ARE doing text classification
 '''
 
-def description():
-def tweet():
-def name():
-def screen_name():
+#def description():
+#def tweet():
+#def name():
+#def screen_name():
 
 #def combinedFeatures():
 

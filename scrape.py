@@ -71,7 +71,11 @@ def main():
                 json.dump(copy, output1)
 
             with open('data/twitter_gender_data.json', 'w') as output2:
-                json.dump(allUsers, output2)   
+                json.dump(allUsers, output2)
+            
+            with open('logs/log.txt', 'a') as log:
+                log.write("Finished writing output, script complete.")
+                log.write("\n")
 
 if __name__ == '__main__':
     main()
