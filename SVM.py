@@ -5,39 +5,49 @@ except ImportError:
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import svm
+from sklearn.model_selection import train_test_split
+from functools import reduce
 
 def main():
     with open('data/twitter_gender_data.json') as data:
         data = json.load(data)
 
         # slice data
-        created_at = data[:, 'created_at']
-        favourites_count = data[:, 'favourites_count']
-        color = data[:, 'color']
-        listed_count = data[:, 'listed_count']
-        description = data[:, 'description']
-        tweet = data[:, 'tweet']
-        name = data[:, 'name']
-        screen_name = data[:, 'screen_name']
-        gender = data[:, 'gender']
+        created_at = [d["created_at"] for d in data]
+        favourites_count = [d["favourites_count"] for d in data]
+        color = [d["profile_background_color"] for d in data]
+        listed_count = [d["listed_count"] for d in data]
+        description = [d["description"] for d in data]
+        tweet = [d["tweet"] for d in data]
+        name = [d["name"] for d in data]
+        screen_name = [d["screen_name"] for d in data]
+        gender = [d["gender"] for d in data]
 
 
 
         # create models, plot and then get accuracy of models
-        created_at_acc = created_at(created_at, gender)
-        favourites_acc = favourites_count(favourites_count, gender)
-        color_acc = color(color, gender)
-        listed_acc = listed_count(listed_count, gender)
+        #created_at_acc = created_at_model(created_at, gender)
+        favourites_acc = favourites_count_model(favourites_count, gender)
+        print('accuracy:')
+        print(str(favourites_acc))
+        #color_acc = color_model(color, gender)
+        #listed_acc = listed_count_model(listed_count, gender)
         #description_acc = description(description, gender)
         #tweet_acc = tweet(tweet, gender)
         #name_acc = name(name, gender)
         #screen_name_acc = screen_name(screen_name, gender)
 
-        plotAccuracy(created_at_acc, favourites_acc,
-                     color_acc, listed_acc, description_acc,
-                     tweet_acc, name_acc, screen_name_acc, 'Accuracy')
+        #scikit_test()
 
+        #plotAccuracy(created_at_acc, favourites_acc,
+        #             color_acc, listed_acc, description_acc,
+        #             tweet_acc, name_acc, screen_name_acc, 'Accuracy')
 
+def scikit_test():
+    X = [[0, 0], [1, 1]]
+    y = [0, 1]
+    clf = svm.SVC(gamma='scale')
+    clf.fit(X, y)
 
 def plotAccuracy(created_at_acc, favourites_acc,
                  color_acc, listed_acc, description_acc,
@@ -72,15 +82,21 @@ def plotFeatureData(X, actY, predY, graph_name):
     graph = 'plots/' + graph_name + '.png'    
     fig.savefig(graph)
 
+def isPredictionCorrect(y, pred):
+  if y == pred:
+    return 1
+  else:
+    return 0
+
 def getAccuracy(actY, predY):
-    acc = reduce(lambda m, n: m+n, list(isPredictionCorrect, actY, predY))
+    acc = reduce(lambda m, n: m+n, list(map(isPredictionCorrect, actY, predY)))
     return (acc / len(actY))
 
 ''' 
     Models that ARE NOT doing text classification
 '''
 
-def created_at(created_at):
+def created_at_model(created_at, gender):
     # create Model
     X = np.array(created_at)
     y = np.array(gender)
@@ -93,9 +109,7 @@ def created_at(created_at):
     plotFeatureData(X, y, predY, 'Created_At')
     return validate(X, y, predY)
 
-def color(pf_background_color, pf_link_color, 
-          pf_sidebar_border_color, pf_sidebar_fill_color, 
-          pf_text_color):
+def color_model(color, gender):
     # profile_background_color
     # profile_link_color
     # profile_sidebar_border_color
@@ -114,20 +128,29 @@ def color(pf_background_color, pf_link_color,
     plotFeatureData(X, y, predY, 'Favourites_Count')
     return validate(X, y, predY)
 
-def favourites_count(favourites_count, gender):
+def favourites_count_model(favourites_count, gender):
     # create Model
-    X = np.array(favourites_count)
-    y = np.array(gender)
+    X = np.array(favourites_count).reshape(-1,1)
+    y = np.where(np.array(gender) == 'M', 0, 1)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.9)
+
     clf = svm.SVC(kernel='linear', C = 1.0)
-    clf.fit(X, y)
+
+    print(Xtrain)
+    print(ytrain)
+
+    clf.fit(Xtrain, ytrain)
+
+    print('here!')
 
     # make predicitions
-    predY = [clf.predict(x) for x in X]
+    predY = clf.predict(Xtest.reshape(-1,1))
     #plot data, get and return accuracy of model
-    plotFeatureData(X, y, predY, 'Favourites_Count')
-    return validate(X, y, predY)
+    plotFeatureData(Xtest, ytest, predY, 'Favourites_Count')
+    print("now")
+    return getAccuracy(ytest, predY)
 
-def listed_count(listed_count):
+def listed_count_model(listed_count):
     # create Model
     X = np.array(listed_count)
     y = np.array(gender)
