@@ -186,11 +186,26 @@ def listed_count_model(listed_count, gender):
     Models that ARE doing text classification
 '''
 
-#def description():
-#def tweet():
-#def name():
-#def screen_name():
+def description():
+def tweet():
+def name():
+def screen_name():
 
+def textClassification(X, y):
+    # create a dataframe using texts and lables
+        trainDF = pandas.DataFrame()
+        trainDF['text'] = description
+        trainDF['label'] = gender
+
+        # split the dataset into training and validation datasets 
+        train_x, test_x, train_y, test_y = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.1)
+
+        vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
+        train_x = vectorizer.fit_transform(train_x)
+        test_x = vectorizer.transform(test_x)
+
+        model = svm.SVC(C=1.0,kernel='linear')
+        model.fit(train_x, train_y)
 
 #def combinedFeatures():
 
