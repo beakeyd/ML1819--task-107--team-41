@@ -10,6 +10,7 @@ from datetime import datetime as dt
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 from functools import reduce
+from sklearn.neural_network import MLPClassifier
 
 
 def main():
@@ -26,8 +27,6 @@ def main():
         name = [d["name"] for d in data]
         screen_name = [d["screen_name"] for d in data]
         gender = [d["gender"] for d in data]
-
-
 
         # create models, plot and then get accuracy of models
         created_at_acc = created_at_model(created_at, gender)
@@ -136,7 +135,8 @@ def color_model(profile_background_color, gender):
     y = np.where(np.array(gender) == 'M', 0, 1)
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
-    clf = svm.SVC(kernel='linear', C = 1.0)
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+                        hidden_layer_sizes=(5, 2), random_state=1)
 
     print(Xtrain)
     print(ytrain)
@@ -158,7 +158,8 @@ def favourites_count_model(favourites_count, gender):
     y = np.where(np.array(gender) == 'M', 0, 1)
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
-    clf = svm.SVC(kernel='linear', C = 1.0)
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+                        hidden_layer_sizes=(5, 2), random_state=1)
     clf.fit(Xtrain, ytrain)
 
     # make predicitions
@@ -173,8 +174,12 @@ def listed_count_model(listed_count, gender):
     y = np.where(np.array(gender) == 'M', 0, 1)
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
-    clf = svm.SVC(kernel='linear', C = 1.0)
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+                        hidden_layer_sizes=(5, 2), random_state=1)
     clf.fit(Xtrain, ytrain)
+
+    #clf = svm.SVC(kernel='poly', C = 1.0, degree=10)
+    #clf.fit(Xtrain, ytrain)
 
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1,1))
