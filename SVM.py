@@ -23,6 +23,10 @@ def main():
         created_at = [d["created_at"] for d in data]
         favourites_count = [d["favourites_count"] for d in data]
         profile_background_color = [d["profile_background_color"] for d in data]
+        profile_link_color = [d["profile_link_color"] for d in data]
+        profile_sidebar_fill_color = [d["profile_sidebar_fill_color"] for d in data]
+        profile_text_color = [d["profile_text_color"] for d in data]
+        profile_sidebar_border_color = [d["profile_sidebar_border_color"] for d in data]
         listed_count = [d["listed_count"] for d in data]
         description = [d["description"] for d in data]
         tweet = [d["tweet"] for d in data]
@@ -34,7 +38,9 @@ def main():
         # create models, plot and then get accuracy of models
         created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
-        color_acc = color_model(profile_background_color, gender)
+        color_acc = color_model(profile_background_color, profile_sidebar_fill_color,
+                                profile_text_color, profile_sidebar_border_color,
+                                profile_link_color, gender)
         listed_acc = listed_count_model(listed_count, gender)   
         description_acc = description_model(description, gender)
         tweet_acc = tweet_model(tweet, gender)
@@ -48,12 +54,6 @@ def main():
 def normaliseData(x):
     scale=x.max(axis=0)
     return (x/scale, scale)
-
-def scikit_test():
-    X = [[0, 0], [1, 1]]
-    y = [0, 1]
-    clf = svm.SVC(gamma='scale')
-    clf.fit(X, y)
 
 def plotAccuracy(created_at_acc, favourites_acc,
                  color_acc, listed_acc, description_acc,
@@ -73,8 +73,8 @@ def plotAccuracy(created_at_acc, favourites_acc,
     plt.xticks(y_pos, X_axis)
     plt.ylabel('Accuracy')
     plt.title('Accuracy of features')
-    graph = 'plots/' + graph_name + '.png'  
-    fig.savefig(graph)
+    graph = 'plots/' + graph_name + '.png'
+
 
 
 def plotFeatureData(X, actY, predY, graph_name):
@@ -118,20 +118,25 @@ def created_at_model(created_at, y):
     plotFeatureData(Xtest, ytest, predY, 'Created_At')
     return getAccuracy(ytest, predY)
 
-def color_model(profile_background_color, y):
+def color_model(profile_background_color, profile_sidebar_fill_color,
+                profile_text_color, profile_sidebar_border_color,
+                profile_link_color, y):
                 
-    (X, _) = normaliseData(np.array([int(x, 16) for x in profile_background_color]).reshape(-1,1))
-
+    (X1, _) = normaliseData(np.array([int(x, 16) for x in profile_background_color]).reshape(-1,1))
+    (X2, _) = normaliseData( np.array([int(x, 16) for x in profile_sidebar_fill_color]).reshape(-1,1))
+    (X3, _) = normaliseData(np.array([int(x, 16) for x in profile_text_color]).reshape(-1,1))
+    (X4, _) = normaliseData(np.array([int(x, 16) for x in profile_sidebar_border_color]).reshape(-1,1))
+    (X5, _)= normaliseData(np.array([int(x, 16) for x in profile_link_color]).reshape(-1,1))
+    X=np.column_stack((X1, X2, X3, X4, X5))
     # create Model
-    #(X, _) = normaliseData(np.array(newList).reshape(-1,1))
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.99)
 
     clf = svm.SVC(kernel='linear', C = 1.0)
 
     clf.fit(Xtrain, ytrain)
 
     # make predicitions
-    predY = clf.predict(Xtest.reshape(-1, 1))
+    predY = clf.predict(Xtest)
     #plot data, get and return accuracy of model
 
     plotFeatureData(Xtest, ytest, predY, 'Color')
@@ -139,7 +144,7 @@ def color_model(profile_background_color, y):
 
 def favourites_count_model(favourites_count, y):
     # create Model
-    (X, Xscale) = normaliseData(np.array(favourites_count).reshape(-1,1))
+    (X, _) = normaliseData(np.array(favourites_count).reshape(-1,1))
 
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
@@ -154,7 +159,7 @@ def favourites_count_model(favourites_count, y):
 
 def listed_count_model(listed_count, y):
     # create Model
-    (X, Xscale) = normaliseData(np.array(listed_count).reshape(-1,1))
+    (X, _) = normaliseData(np.array(listed_count).reshape(-1,1))
 
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
@@ -210,6 +215,7 @@ def textClassification(X, y):
     return Xtest, ytest, predY
 
 #def combinedFeatures():
+
 
 if __name__ == '__main__':
     main()
