@@ -17,13 +17,11 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 import pandas, numpy, textblob, string
 
-
 def main():
-    print("wefwef")
     with open('data/twitter_gender_data.json') as data:
         data = json.load(data)
 
-        description = [d["screen_name"] for d in data]
+        description = [d["tweet"] for d in data]
         gender = [d["gender"] for d in data]
 
         # create a dataframe using texts and lables

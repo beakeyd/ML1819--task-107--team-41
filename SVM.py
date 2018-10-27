@@ -8,9 +8,12 @@ import matplotlib.pyplot as plt
 import time
 from datetime import datetime as dt
 from sklearn import svm
+from sklearn import model_selection, preprocessing, linear_model, naive_bayes, metrics, svm
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sklearn.metrics import classification_report 
 from sklearn.model_selection import train_test_split
+import pandas, numpy, textblob, string
 from functools import reduce
-
 
 def main():
     with open('data/twitter_gender_data.json') as data:
@@ -32,25 +35,15 @@ def main():
         created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
         color_acc = color_model(profile_background_color, gender)
-        listed_acc = listed_count_model(listed_count, gender)
-        print('listed accuracy:')
-        print(str(listed_acc))
-        print('color accuracy:')
-        print(str(color_acc))
-        print('favourites accuracy:')
-        print(str(favourites_acc))
-        print('created_at accuracy:')
-        print(str(created_at_acc))        
-        #description_acc = description(description, gender)
-        #tweet_acc = tweet(tweet, gender)
-        #name_acc = name(name, gender)
-        #screen_name_acc = screen_name(screen_name, gender)
+        listed_acc = listed_count_model(listed_count, gender)   
+        description_acc = description_model(description, gender)
+        tweet_acc = tweet_model(tweet, gender)
+        name_acc = name_model(name, gender)
+        #screen_name_acc = screen_name_model(screen_name, gender)
 
-        #scikit_test()
-
-        #plotAccuracy(created_at_acc, favourites_acc,
-        #             color_acc, listed_acc, description_acc,
-        #             tweet_acc, name_acc, screen_name_acc, 'Accuracy')
+        plotAccuracy(created_at_acc, favourites_acc,
+                     color_acc, listed_acc, description_acc,
+                     tweet_acc, name_acc, 'Accuracy')
 
 def normaliseData(x):
     scale=x.max(axis=0)
@@ -64,23 +57,23 @@ def scikit_test():
 
 def plotAccuracy(created_at_acc, favourites_acc,
                  color_acc, listed_acc, description_acc,
-                 tweet_acc, name_acc, screen_name_acc, graph_name):
+                 tweet_acc, name_acc, graph_name):
     
-
-    X = ['created_at', 'favourites',
-         'color', 'listed', 'description',
-         'tweet', 'name', 'screen_name']
-    y = [created_at_acc, favourites_acc,
+    y = (created_at_acc, favourites_acc,
          color_acc, listed_acc, description_acc,
-         tweet_acc, name_acc, screen_name_acc]
+         tweet_acc, name_acc)
 
-    fig, ax = plt.bar(figsize=(12,2))
-    ax.bar(X, y, label='Accuracy')
+    X_axis = ['created_at', 'favourites',
+              'color', 'listed', 'description',
+              'tweet', 'name']
 
-    ax.set_xlabel('Feature')
-    ax.set_ylabel('Accuracy')
-    ax.set_title('Accuracy of Features chart')
-    graph = 'plots/' + graph_name + '.png'   
+    y_pos = np.arange(len(X_axis))
+
+    plt.bar(y_pos, y, align='center', alpha=0.5)
+    plt.xticks(y_pos, X_axis)
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy of features')
+    graph = 'plots/' + graph_name + '.png'  
     fig.savefig(graph)
 
 
@@ -178,31 +171,43 @@ def listed_count_model(listed_count, y):
     Models that ARE doing text classification
 '''
 
+def description_model(description, gender):
+    Xtest, ytest, predY = textClassification(description, gender)
+    print('Description Model Metrics: ')
+    print(classification_report(ytest, predY))
+    return getAccuracy(ytest, predY)
 
-#def description(description, gender):
-
-#def tweet(tweet, gender):
-
-#def name(name, gender):
-
-#def screen_name(screen_name, gender):
-
+def tweet_model(tweet, gender):
+    Xtest, ytest, predY = textClassification(tweet, gender)
+    print('Tweet Model Metrics: ')
+    print(classification_report(ytest, predY))
+    return getAccuracy(ytest, predY)
+    
+def name_model(name, gender):
+    Xtest, ytest, predY = textClassification(name, gender)
+    print('Name Model Metrics: ')
+    print(classification_report(ytest, predY))
+    return getAccuracy(ytest, predY)
 
 def textClassification(X, y):
     # create a dataframe using texts and lables
-        trainDF = pandas.DataFrame()
-        trainDF['text'] = description
-        trainDF['label'] = gender
+    trainDF = pandas.DataFrame()
+    trainDF['text'] = X
+    trainDF['label'] = y
 
-        # split the dataset into training and validation datasets 
-        train_x, test_x, train_y, test_y = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.1)
+    # split the dataset into training and validation datasets 
+    Xtrain, Xtest, ytrain, ytest = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.1)
 
-        vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
-        train_x = vectorizer.fit_transform(train_x)
-        test_x = vectorizer.transform(test_x)
+    vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
+    Xtrain = vectorizer.fit_transform(Xtrain)
+    Xtest = vectorizer.transform(Xtest)
 
-        model = svm.SVC(C=1.0,kernel='linear')
-        model.fit(train_x, train_y)
+    model = svm.SVC(C=1.0,kernel='linear')
+    model.fit(Xtrain, ytrain)
+
+    predY = model.predict(Xtest)
+
+    return Xtest, ytest, predY
 
 #def combinedFeatures():
 
