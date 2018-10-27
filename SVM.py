@@ -25,8 +25,7 @@ def main():
         tweet = [d["tweet"] for d in data]
         name = [d["name"] for d in data]
         screen_name = [d["screen_name"] for d in data]
-        gender = [d["gender"] for d in data]
-
+        gender = np.where(np.array([d["gender"] for d in data]) == 'M', 0, 1)
 
 
         # create models, plot and then get accuracy of models
@@ -40,6 +39,8 @@ def main():
         print(str(color_acc))
         print('favourites accuracy:')
         print(str(favourites_acc))
+        print('created_at accuracy:')
+        print(str(created_at_acc))        
         #description_acc = description(description, gender)
         #tweet_acc = tweet(tweet, gender)
         #name_acc = name(name, gender)
@@ -109,53 +110,44 @@ def getAccuracy(actY, predY):
     Models that ARE NOT doing text classification
 '''
 
-def created_at_model(created_at, gender):
+def created_at_model(created_at, y):
     # create Model
-    X = np.array(created_at)
-    y = np.array(gender)
+    (X, Xscale) = normaliseData(np.array(created_at).reshape(-1,1))
 
-    date = dt.strptime(X[0], "%a %b %d %H:%M:%S +0000 %Y")
-    print(time.mktime(date.timetuple()))
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
-    #clf = svm.SVC(kernel='linear', C = 1.0)
-    #clf.fit(X, y)
+    clf = svm.SVC(kernel='linear', C = 1.0)
+    clf.fit(X, y)
 
     # make predicitions
-    #predY = [clf.predict(x) for x in X]
+    predY = clf.predict(Xtest.reshape(-1, 1))
     #plot data, get and return accuracy of model
-    #plotFeatureData(X, y, predY, 'Created_At')
-    # validate(X, y, predY)
-    return 0 
+    plotFeatureData(Xtest, ytest, predY, 'Created_At')
+    return getAccuracy(ytest, predY)
 
-def color_model(profile_background_color, gender):
+def color_model(profile_background_color, y):
                 
     (X, _) = normaliseData(np.array([int(x, 16) for x in profile_background_color]).reshape(-1,1))
 
     # create Model
     #(X, _) = normaliseData(np.array(newList).reshape(-1,1))
-    y = np.where(np.array(gender) == 'M', 0, 1)
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
     clf = svm.SVC(kernel='linear', C = 1.0)
 
-    print(Xtrain)
-    print(ytrain)
-    
     clf.fit(Xtrain, ytrain)
-
-    print('here!')
 
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1, 1))
     #plot data, get and return accuracy of model
-    print(predY)
+
     plotFeatureData(Xtest, ytest, predY, 'Color')
     return getAccuracy(ytest, predY)
 
-def favourites_count_model(favourites_count, gender):
+def favourites_count_model(favourites_count, y):
     # create Model
     (X, Xscale) = normaliseData(np.array(favourites_count).reshape(-1,1))
-    y = np.where(np.array(gender) == 'M', 0, 1)
+
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
     clf = svm.SVC(kernel='linear', C = 1.0)
@@ -167,10 +159,10 @@ def favourites_count_model(favourites_count, gender):
     plotFeatureData(Xtest, ytest, predY, 'Favourites_Count')
     return getAccuracy(ytest, predY)
 
-def listed_count_model(listed_count, gender):
+def listed_count_model(listed_count, y):
     # create Model
     (X, Xscale) = normaliseData(np.array(listed_count).reshape(-1,1))
-    y = np.where(np.array(gender) == 'M', 0, 1)
+
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
     clf = svm.SVC(kernel='linear', C = 1.0)
@@ -186,10 +178,15 @@ def listed_count_model(listed_count, gender):
     Models that ARE doing text classification
 '''
 
-def description():
-def tweet():
-def name():
-def screen_name():
+
+#def description(description, gender):
+
+#def tweet(tweet, gender):
+
+#def name(name, gender):
+
+#def screen_name(screen_name, gender):
+
 
 def textClassification(X, y):
     # create a dataframe using texts and lables

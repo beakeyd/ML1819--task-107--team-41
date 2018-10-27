@@ -23,7 +23,7 @@ def main():
     with open('data/twitter_gender_data.json') as data:
         data = json.load(data)
 
-        description = [d["name"] for d in data]
+        description = [d["screen_name"] for d in data]
         gender = [d["gender"] for d in data]
 
         # create a dataframe using texts and lables
@@ -31,7 +31,7 @@ def main():
         trainDF['text'] = description
         trainDF['label'] = gender
 
-        # split the dataset into training and validation datasets 
+        # split the dataset into training and validation datasets
         train_x, test_x, train_y, test_y = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.1)
 
         vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
