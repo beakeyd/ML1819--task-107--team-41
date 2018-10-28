@@ -17,9 +17,10 @@ def main():
     with open('data/twitter_gender_data.json') as data:
         data = json.load(data)
 
+
         # slice data
         created_at = [d["created_at"] for d in data]
-        favourites_count = [d["favourites_count"] for d in data]
+        favourites_count = [d["favourites_count"]//1000 for d in data]
         profile_background_color = [d["profile_background_color"] for d in data]
         listed_count = [d["listed_count"] for d in data]
         description = [d["description"] for d in data]
@@ -27,7 +28,7 @@ def main():
         name = [d["name"] for d in data]
         screen_name = [d["screen_name"] for d in data]
         gender = [d["gender"] for d in data]
-
+      
         # create models, plot and then get accuracy of models
         created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
@@ -135,13 +136,16 @@ def color_model(profile_background_color, gender):
     y = np.where(np.array(gender) == 'M', 0, 1)
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                        hidden_layer_sizes=(5, 2), random_state=1)
+    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+    #                    hidden_layer_sizes=(5, 2), random_state=1)
+
+    clf = svm.SVC(kernel='poly', C = 1.0, degree=3)
+    clf.fit(Xtrain, ytrain)
 
     print(Xtrain)
     print(ytrain)
     
-    clf.fit(Xtrain, ytrain)
+    #clf.fit(Xtrain, ytrain)
 
     print('here!')
 
@@ -158,8 +162,11 @@ def favourites_count_model(favourites_count, gender):
     y = np.where(np.array(gender) == 'M', 0, 1)
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                        hidden_layer_sizes=(5, 2), random_state=1)
+    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+    #                    hidden_layer_sizes=(5, 2), random_state=1)
+    #clf.fit(Xtrain, ytrain)
+
+    clf = svm.SVC(kernel='poly', C = 1.0, degree=3)
     clf.fit(Xtrain, ytrain)
 
     # make predicitions
@@ -174,12 +181,12 @@ def listed_count_model(listed_count, gender):
     y = np.where(np.array(gender) == 'M', 0, 1)
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
 
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                        hidden_layer_sizes=(5, 2), random_state=1)
-    clf.fit(Xtrain, ytrain)
-
-    #clf = svm.SVC(kernel='poly', C = 1.0, degree=10)
+    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+    #                    hidden_layer_sizes=(5, 2), random_state=1)
     #clf.fit(Xtrain, ytrain)
+
+    clf = svm.SVC(kernel='poly', C = 1.0, degree=3)
+    clf.fit(Xtrain, ytrain)
 
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1,1))
