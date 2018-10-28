@@ -20,10 +20,9 @@ def main():
     with open('data/twitter_gender_data.json') as data:
         data = json.load(data)
 
-
         # slice data
         created_at = [d["created_at"] for d in data]
-        favourites_count = [d["favourites_count"]//1000 for d in data]
+        favourites_count = [d["favourites_count"]for d in data]
         profile_background_color = [d["profile_background_color"] for d in data]
         profile_link_color = [d["profile_link_color"] for d in data]
         profile_sidebar_fill_color = [d["profile_sidebar_fill_color"] for d in data]
@@ -47,7 +46,6 @@ def main():
         description_acc = description_model(description, gender)
         tweet_acc = tweet_model(tweet, gender)
         name_acc = name_model(name, gender)
-        #screen_name_acc = screen_name_model(screen_name, gender)
 
         plotAccuracy(created_at_acc, favourites_acc,
                      color_acc, listed_acc, description_acc,
@@ -108,15 +106,15 @@ def getAccuracy(actY, predY):
 def created_at_model(created_at, y):
     # create Model
     (X, Xscale) = normaliseData(np.array(created_at).reshape(-1,1))
-
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
-
     clf = svm.SVC(kernel='linear', C = 1.0)
     clf.fit(X, y)
 
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1, 1))
     #plot data, get and return accuracy of model
+    print('created_at Model metrics: ')
+    print(classification_report(ytest, predY))
     plotFeatureData(Xtest, ytest, predY, 'Created_At')
     return getAccuracy(ytest, predY)
 
@@ -132,57 +130,44 @@ def color_model(profile_background_color, profile_sidebar_fill_color,
     X=np.column_stack((X1, X2, X3, X4, X5))
     # create Model
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.99)
-
-    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-    #                    hidden_layer_sizes=(5, 2), random_state=1)
-
     clf = svm.SVC(kernel='poly', C = 1.0, degree=3)
-    clf.fit(Xtrain, ytrain)
-
     clf.fit(Xtrain, ytrain)
 
     # make predicitions
     predY = clf.predict(Xtest)
     #plot data, get and return accuracy of model
-
-    plotFeatureData(Xtest, ytest, predY, 'Color')
+    print('color Model metrics: ')
+    print(classification_report(ytest, predY))
+    #plotFeatureData(Xtest, ytest, predY, 'Color')
     return getAccuracy(ytest, predY)
 
 def favourites_count_model(favourites_count, y):
     # create Model
     (X, _) = normaliseData(np.array(favourites_count).reshape(-1,1))
-
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
-
-    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-    #                    hidden_layer_sizes=(5, 2), random_state=1)
-    #clf.fit(Xtrain, ytrain)
-
     clf = svm.SVC(kernel='poly', C = 1.0, degree=3)
     clf.fit(Xtrain, ytrain)
 
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1,1))
     #plot data, get and return accuracy of model
+    print('favourites_count Model metrics: ')
+    print(classification_report(ytest, predY))
     plotFeatureData(Xtest, ytest, predY, 'Favourites_Count')
     return getAccuracy(ytest, predY)
 
 def listed_count_model(listed_count, y):
     # create Model
     (X, _) = normaliseData(np.array(listed_count).reshape(-1,1))
-
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
-
-    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-    #                    hidden_layer_sizes=(5, 2), random_state=1)
-    #clf.fit(Xtrain, ytrain)
-
     clf = svm.SVC(kernel='poly', C = 1.0, degree=3)
     clf.fit(Xtrain, ytrain)
 
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1,1))
     #plot data, get and return accuracy of model
+    print('listed_count Model metrics: ')
+    print(classification_report(ytest, predY))
     plotFeatureData(Xtest, ytest, predY, 'Listed_Count')
     return getAccuracy(ytest, predY)
 
@@ -216,16 +201,13 @@ def textClassification(X, y):
 
     # split the dataset into training and validation datasets 
     Xtrain, Xtest, ytrain, ytest = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.1)
-
     vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
     Xtrain = vectorizer.fit_transform(Xtrain)
     Xtest = vectorizer.transform(Xtest)
 
     model = svm.SVC(C=1.0,kernel='linear')
     model.fit(Xtrain, ytrain)
-
     predY = model.predict(Xtest)
-
     return Xtest, ytest, predY
 
 #def combinedFeatures():
