@@ -170,7 +170,7 @@ def created_at_model(created_at, y):
     # create Model
     (X, Xscale) = normaliseData(np.array(created_at).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
-    clf = svm.SVC(kernel='poly')
+    clf = svm.NuSVC(kernel='poly')
     #getCAndGamma(clf, X, y, 'created_at_model')
     clf.fit(X, y)
 
@@ -196,7 +196,7 @@ def color_model(profile_background_color, profile_sidebar_fill_color,
     X=np.column_stack((X1, X2))
     # create Model
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, gender, test_size=0.1, random_state=42)
-    clf = svm.SVC(kernel='poly')
+    clf = svm.NuSVC(kernel='poly')
     #getCAndGamma(clf, Xtest, ytest, 'color_model')
     clf.fit(Xtrain, ytrain)
 
@@ -216,7 +216,7 @@ def favourites_count_model(favourites_count, y):
     # create Model
     (X, _) = normaliseData(np.array(favourites_count).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y,test_size=0.1, random_state=42)
-    clf = svm.SVC(kernel='poly', degree=3)
+    clf = svm.NuSVC(kernel='poly', degree=3)
     #getCAndGamma(clf, X, y, 'favourites_count_model')
     clf.fit(Xtrain, ytrain)
     # make predicitions
@@ -236,7 +236,7 @@ def listed_count_model(listed_count, y):
     # create Model
     (X, _) = normaliseData(np.array(listed_count).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
-    clf = svm.SVC(kernel='poly', degree=3)
+    clf = svm.NuSVC(kernel='poly', degree=3)
     #getCAndGamma(clf, X, y, 'listed_count_model')
     clf.fit(Xtrain, ytrain)
 
@@ -445,27 +445,27 @@ def combinedNumericFeatures(x1, x2,df):
     
     
 def printBestCGamma(model,Xtrain, ytrain,X_test,y_test, feature_count):
-   # print(model.get_params().keys())
+    #print(model.get_params().keys())
     if(feature_count=="multiple"):
         hyperparameters = { 'classifier__C': [.001,.001,.01,.1,1,10],
                             'classifier__gamma': [.000001,.00001,.0001,.001]
                         
                         }
     else:
-        hyperparameters = { 'C': [.001,.001,.01,.1,1,10],
+        hyperparameters = { 'nu': [.1,.2,.3,.4,.5,.6,.7,.8,.9,.99],
                             'gamma': [.000001,.00001,.0001,.001]
                         
                         }
     clf = GridSearchCV(model, hyperparameters, cv=5)
     clf.fit(Xtrain, ytrain)
-    #print(clf.best_params_)
+    print(clf.best_params_)
     
     clf.refit
     preds = clf.predict(X_test)
     
 
     
-    print(preds)
+    #print(preds)
     print( np.mean(preds == y_test))
     print(classification_report(y_test, preds))
     return preds
