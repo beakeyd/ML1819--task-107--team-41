@@ -12,7 +12,7 @@ from datetime import datetime as dt
 from sklearn import svm
 from sklearn import model_selection, preprocessing, linear_model, naive_bayes, metrics, svm
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from sklearn.metrics import classification_report 
+from sklearn.metrics import classification_report, accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
 import pandas, numpy, textblob, string
@@ -38,7 +38,8 @@ def main():
         screen_name = [d["screen_name"] for d in data]
         gender = np.where(np.array([d["gender"] for d in data]) == 'M', 0, 1)
 
-'''
+        #testL = [[d["name"], d["description"]] for d in data]
+
         # create models, plot and then get accuracy of models
         created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
@@ -53,8 +54,8 @@ def main():
         plotAccuracy(created_at_acc, favourites_acc,
                      color_acc, listed_acc, description_acc,
                      tweet_acc, name_acc, 'Accuracy')
-'''
-        combinedFeatures(name, created_at, gender)
+
+#        combinedFeatures(name, created_at, gender)
 
 def normaliseData(x):
     scale=x.max(axis=0)
@@ -79,6 +80,7 @@ def plotAccuracy(created_at_acc, favourites_acc,
     plt.ylabel('Accuracy')
     plt.title('Accuracy of features')
     graph = 'plots/' + graph_name + '.png'
+    plt.show()
 
 def plotSingleFeatureData(X, actY, predY, graph_name):
     fig, ax = plt.subplots(figsize=(12,2))
@@ -91,6 +93,7 @@ def plotSingleFeatureData(X, actY, predY, graph_name):
     graph = 'plots/' + graph_name + '.png'    
     fig.savefig(graph)
 
+'''
 def plotMultiFeatureData(X, y, predY, scale, model, graph_name):
     fig, ax = plt.subplots(figsize=(12,8))
     # plot the data
@@ -110,18 +113,7 @@ def plotMultiFeatureData(X, y, predY, scale, model, graph_name):
     ax.set_ylabel('Color 2')
     graph = 'plots/' + graph_name + '.png'    
     fig.savefig(graph)
-
-def isPredictionCorrect(y, pred):
-  if y == pred:
-    return 1
-  else:
-    return 0
-
-def getAccuracy(actY, predY):
-    acc = reduce(lambda m, n: m+n, list(map(isPredictionCorrect, actY, predY)))
-
-    return (acc / len(actY))
-
+'''
 ''' 
     Models that ARE NOT doing text classification
 '''
@@ -129,8 +121,8 @@ def getAccuracy(actY, predY):
 def created_at_model(created_at, y):
     # create Model
     (X, Xscale) = normaliseData(np.array(created_at).reshape(-1,1))
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.3)
-    clf = svm.SVC(kernel='linear', C = 1.0)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
+    clf = svm.NuSVC(kernel='poly')
     #getCAndGamma(clf, X, y, 'created_at_model')
     clf.fit(X, y)
 
@@ -140,8 +132,9 @@ def created_at_model(created_at, y):
     print('created_at Model metrics: ')
     print(classification_report(ytest, predY))
     plotSingleFeatureData(Xtest, ytest, predY, 'Created_At')
-
-    return getAccuracy(ytest, predY)
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy
 
 def color_model(profile_background_color, profile_sidebar_fill_color,
                 profile_text_color, profile_sidebar_border_color, gender):
@@ -152,7 +145,7 @@ def color_model(profile_background_color, profile_sidebar_fill_color,
     X=np.column_stack((X1, X2))
     # create Model
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, gender, test_size=0.1)
-    clf = svm.SVC(kernel='poly', C = 1, degree=5)
+    clf = svm.NuSVC(kernel='poly')
     #getCAndGamma(clf, Xtest, ytest, 'color_model')
     clf.fit(Xtrain, ytrain)
 
@@ -162,13 +155,15 @@ def color_model(profile_background_color, profile_sidebar_fill_color,
     print('color Model metrics: ')
     print(classification_report(ytest, predY))
     #plotMultiFeatureData(Xtest, ytest, predY, scale, clf, 'Color')
-    return getAccuracy(ytest, predY)    
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy  
 
 def favourites_count_model(favourites_count, y):
     # create Model
     (X, _) = normaliseData(np.array(favourites_count).reshape(-1,1))
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.3)
-    clf = svm.SVC(kernel='poly', C=10, gamma=10, degree=3)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
+    clf = svm.NuSVC(kernel='poly', degree=3)
     #getCAndGamma(clf, X, y, 'favourites_count_model')
     clf.fit(Xtrain, ytrain)
     # make predicitions
@@ -178,13 +173,15 @@ def favourites_count_model(favourites_count, y):
     print(classification_report(ytest, predY))
     plotSingleFeatureData(Xtest, ytest, predY, 'Favourites_Count')
 
-    return getAccuracy(ytest, predY)
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy
 
 def listed_count_model(listed_count, y):
     # create Model
     (X, _) = normaliseData(np.array(listed_count).reshape(-1,1))
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.3)
-    clf = svm.SVC(kernel='poly', C=10, degree=3)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1)
+    clf = svm.NuSVC(kernel='poly', degree=3)
     #getCAndGamma(clf, X, y, 'listed_count_model')
     clf.fit(Xtrain, ytrain)
 
@@ -194,43 +191,66 @@ def listed_count_model(listed_count, y):
     print('listed_count Model metrics: ')
     print(classification_report(ytest, predY))
     plotSingleFeatureData(Xtest, ytest, predY, 'Listed_Count')
-    return getAccuracy(ytest, predY)
+    
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy
 
 ''' 
     Models that ARE doing text classification
 '''
 
 def description_model(description, gender):
-    Xtest, ytest, predY = textClassification(description, gender,  'description_model')
+    Xtest, ytest, predY = textClassification(description, gender, 0.5, 4, 'description_model')
     print('Description Model Metrics: ')
     print(classification_report(ytest, predY))
-    return getAccuracy(ytest, predY)
+    
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy
 
 def tweet_model(tweet, gender):
-    Xtest, ytest, predY = textClassification(tweet, gender, 'tweet_model')
+    Xtest, ytest, predY = textClassification(tweet, gender, 0.1, 10, 'tweet_model')
     print('Tweet Model Metrics: ')
     print(classification_report(ytest, predY))
-    return getAccuracy(ytest, predY)
+    
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy
     
 def name_model(name, gender):
-    Xtest, ytest, predY = textClassification(name, gender, 'name_model')
+    Xtest, ytest, predY = textClassification(name, gender, 0.35, 7, 'name_model')
     print('Name Model Metrics: ')
     print(classification_report(ytest, predY))
-    return getAccuracy(ytest, predY)
+    
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy
 
-def textClassification(X, y, name):
+'''
+def test_model(data, gender):
+    Xtest, ytest, predY = textClassification(test, gender, 'name_model')
+    print('Test Model Metrics: ')
+    print(classification_report(ytest, predY))
+    
+    accuracy = accuracy_score(ytest, predY)
+    print(str(accuracy))
+    return accuracy
+'''
+
+def textClassification(X, y, gamma_val, C_val, name):
     # create a dataframe using texts and lables
     trainDF = pandas.DataFrame()
     trainDF['text'] = X
     trainDF['label'] = y
 
     # split the dataset into training and validation datasets 
-    Xtrain, Xtest, ytrain, ytest = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.3)
+    Xtrain, Xtest, ytrain, ytest = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.1)
     vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
     Xtrain = vectorizer.fit_transform(Xtrain)
     Xtest = vectorizer.transform(Xtest)
 
-    model = svm.SVC(C=10, gamma=1, kernel='poly')
+    model = svm.SVC(kernel='poly', C=C_val, gamma=gamma_val)
   #  getCAndGamma(model, X, y, name)
     model.fit(Xtrain, ytrain)
     predY = model.predict(Xtest)
@@ -261,35 +281,26 @@ def getCAndGamma(model, X, y, name):
     graph = 'plots/' + name + '.png'
     fig2.savefig(graph)
 '''
-
+'''
 def combinedFeatures(feature1_data, feature2_data, y):
-        # perform train/test split
-        Xtrain1, Xtest1, ytrain1, ytest1 = model_selection.train_test_split(feature1_data, y, test_size=0.1)
-        Xtrain2, Xtest2, ytrain2, ytest2 = model_selection.train_test_split(feature2_data, y, test_size=0.1)
+    # perform train/test split
 
-      
-        # define text pre-processing pipeline
-        text_pipeline = Pipeline([
-            ('vect', vectorizer=CountVectorizer(Xtrain1))
-        ])
-        
-        # define pipeline for pre-processing of numeric features
-        numeric_pipeline = Pipeline([
-            ('scaler', MinMaxScaler(Xtrain2))
-        ])
+    clf = svm.SVC(C=10, gamma=1, kernel='poly')
+    classifier = Pipeline([
+    ('features', FeatureUnion([
+        ('name', Pipeline([
+            ('vectorizer', CountVectorizer(stop_words='english',max_df=0.2))
+        ])),
+        ('description', Pipeline([
+            ('vectorizer', CountVectorizer(stop_words='english',max_df=0.2)),
+        ]))
+    ])),
+    ('clf', clf)])
 
-        # combine both steps into a single pipeline
-        pipeline = Pipeline([
-            ('features', FeatureUnion([
-                ('text_processing', text_pipeline),
-                ('num_processing', numeric_pipeline)
-            ])),
-            ('clf',SGDClassifier(loss='hinge', penalty='l2',
-                                               alpha=1e-3, random_state=42,
-                                               max_iter=5, tol=None) )
-        ])
-        pipeline.fit()
-        gs = GridSearchCV(pipeline, self.params, n_jobs=-1, cv=k_folds)
+    classifier.fit(Xtrain1, Xtrain2, ytrain1)
+    predicted = classifier.predict()
+    predicted
+'''
 
 if __name__ == '__main__':
     main()
