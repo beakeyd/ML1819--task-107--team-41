@@ -78,7 +78,7 @@ def main():
 
         #testL = [[d["name"], d["description"]] for d in data]
 
-        # create models, plot and then get accuracy of models
+        #create models, plot and then get accuracy of models
         created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
         color_acc = color_model(profile_background_color, profile_sidebar_fill_color,
@@ -92,7 +92,7 @@ def main():
         plotAccuracy(created_at_acc, favourites_acc,
                      color_acc, listed_acc, description_acc,
                      tweet_acc, name_acc, 'Accuracy')
-                     
+    
     with open('data/twitter_gender_data.json') as data:
         
         df=pandas.read_json(data)
@@ -101,7 +101,9 @@ def main():
         df.head()
         combinedTextFeatures("name", "description", df)
         combinedTextFeatures("name", "tweet", df)
+        combinedTextFeatures("name", "screen_name", df)
         combinedNumericFeatures("name", "created_at", df)
+        combinedTextFeatures("tweet", "description", df)
         
         
 
@@ -171,9 +173,9 @@ def created_at_model(created_at, y):
     (X, Xscale) = normaliseData(np.array(created_at).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
     clf = svm.NuSVC(kernel='poly')
-    #getCAndGamma(clf, X, y, 'created_at_model')
-    clf.fit(X, y)
-
+   
+    clf.fit(Xtrain, ytrain)
+   # getCAndGamma(clf, Xtrain, ytrain, 'created_at_model')
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1, 1))
     #plot data, get and return accuracy of model
@@ -182,7 +184,7 @@ def created_at_model(created_at, y):
     plotSingleFeatureData(Xtest, ytest, predY, 'Created_At')
     accuracy = accuracy_score(ytest, predY)
     print(str(accuracy))
-    predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
+   # predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
     accuracy = accuracy_score(ytest, predY)
     
     return accuracy
@@ -208,7 +210,7 @@ def color_model(profile_background_color, profile_sidebar_fill_color,
     #plotMultiFeatureData(Xtest, ytest, predY, scale, clf, 'Color')
     accuracy = accuracy_score(ytest, predY)
     print(str(accuracy))
-    predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
+   # predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
     accuracy = accuracy_score(ytest, predY)
     return accuracy  
 
@@ -228,7 +230,7 @@ def favourites_count_model(favourites_count, y):
 
     accuracy = accuracy_score(ytest, predY)
     print(str(accuracy))
-    predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
+ #   predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
     accuracy = accuracy_score(ytest, predY)
     return accuracy
 
@@ -249,7 +251,7 @@ def listed_count_model(listed_count, y):
     
     accuracy = accuracy_score(ytest, predY)
     print(str(accuracy))
-    predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
+  #  predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
     accuracy = accuracy_score(ytest, predY)
     return accuracy
 
@@ -258,8 +260,9 @@ def listed_count_model(listed_count, y):
 '''
 
 def description_model(description, gender):
-    Xtest, ytest, predY = textClassification(description, gender, 0.5, 4, 'description_model')
     print('Description Model Metrics: ')
+    Xtest, ytest, predY = textClassification(description, gender, 0.5, 4, 'description_model')
+    
    
     
     accuracy = accuracy_score(ytest, predY)
@@ -267,8 +270,9 @@ def description_model(description, gender):
     return accuracy
 
 def tweet_model(tweet, gender):
-    Xtest, ytest, predY = textClassification(tweet, gender, 0.1, 10, 'tweet_model')
     print('Tweet Model Metrics: ')
+    Xtest, ytest, predY = textClassification(tweet, gender, 0.1, 10, 'tweet_model')
+    
    
     
     accuracy = accuracy_score(ytest, predY)
@@ -276,8 +280,9 @@ def tweet_model(tweet, gender):
     return accuracy
     
 def name_model(name, gender):
-    Xtest, ytest, predY = textClassification(name, gender, 0.35, 7, 'name_model')
     print('Name Model Metrics: ')
+    Xtest, ytest, predY = textClassification(name, gender, 0.35, 7, 'name_model')
+   
     accuracy = accuracy_score(ytest, predY)
     
     return accuracy
@@ -285,7 +290,7 @@ def name_model(name, gender):
 '''
 def test_model(data, gender):
     Xtest, ytest, predY = textClassification(test, gender, 'name_model')
-    print('Test Model Metrics: ')
+    pr print('Name Model Metrics: ') print('Name Model Metrics: ')int('Test Model Metrics: ')
     print(classification_report(ytest, predY))
     
     accuracy = accuracy_score(ytest, predY)
@@ -314,11 +319,12 @@ def textClassification(X, y, gamma_val, C_val, name):
 #    getCAndGamma(model, X, y, name)
     model.fit(Xtrain, ytrain)
     predY = model.predict(Xtest)
+    accuracy = accuracy_score(ytest, predY)
+    print(accuracy)
     print(classification_report(ytest, predY))
     
     
-    predY=printBestCGamma(model, Xtrain, ytrain, Xtest, ytest, "single")
-   
+  
     
     return Xtest, ytest, predY
 
@@ -326,7 +332,7 @@ def textClassification(X, y, gamma_val, C_val, name):
 
 #taken from SVM Repl
 def getCAndGamma(model, X, y, name):
-    C_s, gamma_s = np.meshgrid(np.logspace(-2, 1, 20), np.logspace(-2, 1, 20))
+    C_s, gamma_s = np.meshgrid(np.logspace(-2,1, 12), np.logspace(-2, 1, 12))
     print(name)
     scores = list()
     i=0; j=0
@@ -393,7 +399,7 @@ def combinedTextFeatures(x1, x2,df):
     print(mean)
     print(classification_report(y_test, preds))
     
-    printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
+    #printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
     
     
     
@@ -420,6 +426,7 @@ def combinedNumericFeatures(x1, x2,df):
             ('words', StandardScaler())
         ])
 
+
     tweet.fit_transform(X_train)
     name.fit_transform(X_train)
     feats = FeatureUnion([('tweet', tweet), 
@@ -440,7 +447,7 @@ def combinedNumericFeatures(x1, x2,df):
     mean=np.mean(preds==y_test)
     print(mean)
     print(classification_report(y_test, preds))
-    printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
+  #  printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
     
     
     
@@ -448,12 +455,13 @@ def printBestCGamma(model,Xtrain, ytrain,X_test,y_test, feature_count):
     #print(model.get_params().keys())
     if(feature_count=="multiple"):
         hyperparameters = { 'classifier__C': [.001,.001,.01,.1,1,10],
-                            'classifier__gamma': [.000001,.00001,.0001,.001]
+                         
                         
                         }
-    else:
-        hyperparameters = { 'nu': [.1,.2,.3,.4,.5,.6,.7,.8,.9,.99],
-                            'gamma': [.000001,.00001,.0001,.001]
+   
+    elif(feature_count=="single"):
+        hyperparameters = { 'nu': [.1,.2,.3,.4,.5,.6,.7,.8,.9,.99]
+                           
                         
                         }
     clf = GridSearchCV(model, hyperparameters, cv=5)
