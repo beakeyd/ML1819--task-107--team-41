@@ -131,17 +131,17 @@ def plotAccuracy(created_at_acc, favourites_acc,
     plt.ylabel('Accuracy')
     plt.title('Accuracy of features')
     graph = 'plots/' + graph_name + '.png'
-    plt.show()
+    #plt.show()
 
 def plotSingleFeatureData(X, actY, predY, graph_name, xLabel):
     fig, ax = plt.subplots(figsize=(6,2))
     ax.scatter(X, actY, label='Data', marker='+')
     ax.scatter(X, predY, label='Prediction', marker='x')
 
-    ax.set_xlabel(xLabel)
+    ax.set_xlabel('test', fontsize=12)
     ax.set_ylabel('Gender')
     ax.set_title(graph_name)
-    graph = 'plots/' + graph_name + '.png'    
+    graph = 'plots/' + graph_name + '1.png'
     fig.savefig(graph)
 
 '''
@@ -239,16 +239,17 @@ def listed_count_model(listed_count, y):
     # create Model
     (X, _) = normaliseData(np.array(listed_count).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
-    clf = svm.NuSVC(kernel='poly', degree=3, nu=.1)
-    #getCAndGamma(clf, X, y, 'listed_count_model')
-    clf.fit(Xtrain, ytrain)
+    clf = svm.NuSVC(kernel='poly', degree=3,nu= .1)
+   
+    clf.fit(X, y)
 
     # make predicitions
     predY = clf.predict(Xtest.reshape(-1,1))
     #plot data, get and return accuracy of model
-    print('listed_count Model metrics: ')
+   
+   
     print(classification_report(ytest, predY))
-    plotSingleFeatureData(Xtest, ytest, predY, 'Listed_Count', 'Number of Lists User appears on - Scaled between 0-1')
+    #plotSingleFeatureData(Xtest, ytest, predY, 'Listed_Count', 'Number of Lists User appears on - Scaled between 0-1')
     
     accuracy = accuracy_score(ytest, predY)
     print(str(accuracy))
@@ -274,7 +275,7 @@ def tweet_model(tweet, gender):
     print('Tweet Model Metrics: ')
     Xtest, ytest, predY = textClassification(tweet, gender, 0.1, 10, 'tweet_model')
     
-   
+    
     
     accuracy = accuracy_score(ytest, predY)
 
@@ -301,7 +302,6 @@ def test_model(data, gender):
 
 def textClassification(X, y, gamma_val, C_val, name):
     # create a dataframe using texts and lables
-   
     trainDF = pandas.DataFrame()
     trainDF['text'] = X
     trainDF['label'] = y
@@ -323,7 +323,9 @@ def textClassification(X, y, gamma_val, C_val, name):
     accuracy = accuracy_score(ytest, predY)
     print(accuracy)
     print(classification_report(ytest, predY))
-    
+    #if(name=="tweet_model"):
+     #   getCAndGamma(model, Xtrain, ytrain, "test")
+
     
   
     
@@ -333,7 +335,7 @@ def textClassification(X, y, gamma_val, C_val, name):
 
 #taken from SVM Repl
 def getCAndGamma(model, X, y, name):
-    C_s, gamma_s = np.meshgrid(np.logspace(-2,1, 12), np.logspace(-2, 1, 12))
+    C_s, gamma_s = np.meshgrid(np.logspace(-2,1, 20), np.logspace(-2, 1, 20))
     print(name)
     scores = list()
     i=0; j=0
@@ -350,11 +352,11 @@ def getCAndGamma(model, X, y, name):
     scores=scores.reshape(C_s.shape)
     fig2, ax2 = plt.subplots(figsize=(20,20))
     c=ax2.contourf(C_s,gamma_s,scores)
-    ax2.set_xlabel('C')
-    ax2.set_ylabel('gamma')
+    ax2.set_xlabel('C', fontsize=20)
+    ax2.set_ylabel('gamma', fontsize=20)
     fig2.colorbar(c)
     graph = 'plots/' + name + '.png'
-    # fig2.savefig(graph)
+    fig2.savefig(graph)
 
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
 def combinedTextFeatures(x1, x2,df):
