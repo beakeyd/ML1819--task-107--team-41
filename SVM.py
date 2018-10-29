@@ -134,11 +134,11 @@ def plotAccuracy(created_at_acc, favourites_acc,
     plt.show()
 
 def plotSingleFeatureData(X, actY, predY, graph_name, xLabel):
-    fig, ax = plt.subplots(figsize=(12,2))
+    fig, ax = plt.subplots(figsize=(6,2))
     ax.scatter(X, actY, label='Data', marker='+')
     ax.scatter(X, predY, label='Prediction', marker='x')
 
-    ax.set_xlabel('Test Feature')
+    ax.set_xlabel(xLabel)
     ax.set_ylabel('Gender')
     ax.set_title(graph_name)
     graph = 'plots/' + graph_name + '.png'    
@@ -354,7 +354,7 @@ def getCAndGamma(model, X, y, name):
     ax2.set_ylabel('gamma')
     fig2.colorbar(c)
     graph = 'plots/' + name + '.png'
-    fig2.savefig(graph)
+    # fig2.savefig(graph)
 
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
 def combinedTextFeatures(x1, x2,df):
