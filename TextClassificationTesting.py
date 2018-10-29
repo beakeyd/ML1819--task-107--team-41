@@ -21,7 +21,7 @@ def main():
     with open('data/twitter_gender_data.json') as data:
         data = json.load(data)
 
-        description = [d["tweet"] for d in data]
+        description = [d["screen_name"] for d in data]
         gender = [d["gender"] for d in data]
 
         # create a dataframe using texts and lables
@@ -40,6 +40,8 @@ def main():
         model.fit(train_x, train_y)
 
         preds = model.predict(test_x)
+        mean=np.mean(preds==test_y)
+        print(mean)
         print(classification_report(test_y, preds))
 
 if __name__ == '__main__':
