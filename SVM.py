@@ -1,3 +1,4 @@
+#!/usr/bin/python
 try:
     import json
 except ImportError:
@@ -99,11 +100,11 @@ def main():
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        combinedTextFeatures("name", "description", df)
-        combinedTextFeatures("name", "tweet", df)
-        combinedTextFeatures("name", "screen_name", df)
-        combinedNumericFeatures("name", "created_at", df)
-        combinedTextFeatures("tweet", "description", df)
+        combinedFeatures("name", "description", df)
+        combinedFeatures("name", "tweet", df)
+        combinedFeatures("name", "screen_name", df)
+        combinedFeatures("name", "created_at", df)
+        combinedFeatures("tweet", "description", df)
         combinedThreeTextFeatures("tweet", "name", "description", df)
         
         
@@ -359,82 +360,48 @@ def getCAndGamma(model, X, y, name):
     fig2.savefig(graph)
 
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
-def combinedTextFeatures(x1, x2,df):
+def combinedFeatures(x1, x2,df):
+    
     print(x1+" and "+x2)
-    graphName=(str(x1+" and "+x2))
-    
+    graphName=(str(x1+" and "+x2))    
     features= [c for c in df.columns.values if c   in [x1,x2]]
-    
     target='gender'
     
 
     X_train, X_test, y_train, y_test = train_test_split(df[features], df[target], test_size=0.1, random_state=42)
     X_train.head()
-    tweet = Pipeline([
-            ('selector', TextSelector(key=x1)),
-            
-            ('words', CountVectorizer(analyzer='word'))
-        ])
-    name= Pipeline([
-            ('selector', TextSelector(key=x2)),
-            
-            ('words', CountVectorizer(analyzer='word'))
-        ])
+    if(isinstance(df.iloc[0][x1], basestring)):
+        feat1 = Pipeline([
+                ('selector', TextSelector(key=x1)),
+                
+                ('words', CountVectorizer(analyzer='word'))
+            ])
+    else:    
+        feat1= Pipeline([
+                ('selector', NumberSelector(key=x1)),
+                
+                ('words', StandardScaler())
+            ])
 
-    tweet.fit_transform(X_train)
-    name.fit_transform(X_train)
-    feats = FeatureUnion([('tweet', tweet), 
+    if(isinstance(df.iloc[0][x2], basestring)):
+        feat2 = Pipeline([
+                ('selector', TextSelector(key=x2)),
+                
+                ('words', CountVectorizer(analyzer='word'))
+            ])
+    else:    
+        feat2= Pipeline([
+                ('selector', NumberSelector(key=x2)),
+                
+                ('words', StandardScaler())
+            ])
+
+
+    feat1.fit_transform(X_train)
+    feat2.fit_transform(X_train)
+    feats = FeatureUnion([('feat1', feat1), 
                     
-                    ('name', name)])
-
-    feature_processing = Pipeline([('feats', feats)])
-    feature_processing.fit_transform(X_train)
-    pipeline = Pipeline([
-        ('features',feats),
-        ('classifier', svm.SVC(kernel='linear', C=10, gamma=1)),
-    ])
-    
-    # Fit and tune model
-    pipeline.fit(X_train, y_train)
-    preds=pipeline.predict(X_test)
-    
-    mean=np.mean(preds==y_test)
-    print(mean)
-    print(classification_report(y_test, preds))
-    
-    #printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
-    
-    
-    
-#The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
-def combinedNumericFeatures(x1, x2,df):
-    print(x1+" and "+x2)
-    graphName=(str(x1+" and "+x2))
-    
-    features= [c for c in df.columns.values if c   in [x1,x2]]
-    
-    target='gender'
-    
-
-    X_train, X_test, y_train, y_test = train_test_split(df[features], df[target], test_size=0.1, random_state=42)
-    X_train.head()
-    tweet = Pipeline([
-            ('selector', TextSelector(key=x1)),
-            
-            ('words', CountVectorizer(analyzer='word'))
-        ])
-    name= Pipeline([
-            ('selector', NumberSelector(key=x2)),
-            
-            ('words', StandardScaler())
-        ])
-
-
-    tweet.fit_transform(X_train)
-    name.fit_transform(X_train)
-    feats = FeatureUnion([('tweet', tweet),
-                    ('name', name)])
-
+                    ('feat2', feat2)])
     feature_processing = Pipeline([('feats', feats)])
     feature_processing.fit_transform(X_train)
     pipeline = Pipeline([
@@ -449,8 +416,9 @@ def combinedNumericFeatures(x1, x2,df):
     mean=np.mean(preds==y_test)
     print(mean)
     print(classification_report(y_test, preds))
-  #  printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
     
+    #printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
+        
     
     
 def printBestCGamma(model,Xtrain, ytrain,X_test,y_test, feature_count):
