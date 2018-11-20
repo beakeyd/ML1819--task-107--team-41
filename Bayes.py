@@ -26,13 +26,13 @@ def bayes(tweetTrain, tweetTest, genderTrain, genderTest):
     print(str(accuracy))   
 
 def main():
-    with open('data/twitter_gender_data.json') as data:
+    with open('data/new_twitter_gender_data.json') as data:
        
         data = json.load(data)
-        tweet = [d["tweet"] for d in data]
+        description = [d["description"] for d in data]
         name = [d["name"] for d in data]
         gender = np.where(np.array([d["gender"] for d in data]) == 'M', 0, 1)
-        Ttrain, Ttest, Gtrain, Gtest = train_test_split(tweet, gender, test_size=0.3, random_state=42)
+        Ttrain, Ttest, Gtrain, Gtest = train_test_split(description, gender, test_size=0.3, random_state=42)
         print(len(Ttrain))
         bayes(Ttrain, Ttest, Gtrain, Gtest)
 
