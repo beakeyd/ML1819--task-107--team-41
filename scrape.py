@@ -70,7 +70,7 @@ def main():
             with open('data/gender2.json', 'w') as output1:
                 json.dump(copy, output1)
 
-            with open('data/twitter_gender_data.json', 'w') as output2:
+            with open('data/newer_twitter_gender_data.json', 'w') as output2:
                 json.dump(allUsers, output2)
             
             with open('logs/log.txt', 'a') as log:
