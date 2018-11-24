@@ -19,10 +19,7 @@ def main():
         profile_text_color = [d["profile_text_color"] for d in data]
         #profile_sidebar_border_color = [d["profile_sidebar_border_color"] for d in data]
         #Ctrain, Ctest, Gtrain, Gtest = train_test_split(description, gender, test_size=0.3, random_state=42)
-        api = twitter.Api(consumer_key=CONSUMER_KEY,
-                      consumer_secret=CONSUMER_SECRET,
-                      access_token_key=ACCESS_KEY,
-                      access_token_secret=ACCESS_SECRET)
+        
 
         allUsers = []
         newDict= {}

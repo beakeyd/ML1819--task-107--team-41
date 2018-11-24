@@ -8,8 +8,8 @@ try:
     import json
 except ImportError:
     import simplejson as json
-
-with open('data/twitter_gender_data.json') as data:
+jsonFile="data/DavidsPruned.json"
+with open(jsonFile) as data:
         nltk.download('stopwords')
         nltk.download('punkt')
         tokenizer = RegexpTokenizer(r'\w+')
