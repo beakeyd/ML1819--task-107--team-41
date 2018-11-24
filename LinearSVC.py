@@ -73,14 +73,16 @@ def main():
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        combinedFeatures("name", "description", df)
-        combinedFeatures("name", "tweet", df)
-        combinedFeatures("name", "screen_name", df)
-        combinedFeatures("name", "created_at", df)
-        combinedFeatures("tweet", "description", df)
-        combinedThreeTextFeatures("tweet", "name", "description", df)
+        #combinedFeatures("name", "description", df)
+        #combinedFeatures("name", "tweet", df)
+        #combinedFeatures("name", "screen_name", df)
+        #combinedFeatures("name", "created_at", df)
+        #combinedFeatures("tweet", "description", df)
+        #combinedThreeTextFeatures("tweet", "name", "description", df)
         
         # slice data
+    with open('data/Davids.json') as data:
+        data = json.load(data)
         created_at = [d["created_at"] for d in data]
         favourites_count = [d["favourites_count"]for d in data]
         profile_background_color = [d["profile_background_color"] for d in data]
@@ -94,22 +96,19 @@ def main():
         name = [d["name"] for d in data]
         screen_name = [d["screen_name"] for d in data]
         gender = np.where(np.array([d["gender"] for d in data]) == 'M', 0, 1)
-
+       
         #testL = [[d["name"], d["description"]] for d in data]
 
         #create models, plot and then get accuracy of models
         created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
-        color_acc = color_model(profile_background_color, profile_sidebar_fill_color,
-                                profile_text_color,
-                                profile_link_color, gender)
         listed_acc = listed_count_model(listed_count, gender)   
         description_acc = description_model(description, gender)
         tweet_acc = tweet_model(tweet, gender)
         name_acc = name_model(name, gender)
 
         plotAccuracy(created_at_acc, favourites_acc,
-                     color_acc, listed_acc, description_acc,
+                     listed_acc, description_acc,
                      tweet_acc, name_acc, 'Accuracy')
     
    
@@ -117,19 +116,20 @@ def main():
         
 
 def normaliseData(x):
+   
     scale=x.max(axis=0)
     return (x/scale, scale)
 
 def plotAccuracy(created_at_acc, favourites_acc,
-                 color_acc, listed_acc, description_acc,
+                 listed_acc, description_acc,
                  tweet_acc, name_acc, graph_name):
     
     y = (created_at_acc, favourites_acc,
-         color_acc, listed_acc, description_acc,
+          listed_acc, description_acc,
          tweet_acc, name_acc)
 
     X_axis = ['created_at', 'favourites',
-              'color', 'listed', 'description',
+               'listed', 'description',
               'tweet', 'name']
 
     y_pos = np.arange(len(X_axis))
@@ -293,7 +293,7 @@ def combinedFeatures(x1, x2,df):
 
     X_train, X_test, y_train, y_test = train_test_split(df[features], df[target], test_size=0.1, random_state=42)
     X_train.head()
-    if(isinstance(df.iloc[0][x1], basestring)):
+    if(isinstance(df.iloc[0][x1], str)):
         feat1 = Pipeline([
                 ('selector', TextSelector(key=x1)),
                 
@@ -306,7 +306,7 @@ def combinedFeatures(x1, x2,df):
                 ('words', StandardScaler())
             ])
 
-    if(isinstance(df.iloc[0][x2], basestring)):
+    if(isinstance(df.iloc[0][x2], str)):
         feat2 = Pipeline([
                 ('selector', TextSelector(key=x2)),
                 

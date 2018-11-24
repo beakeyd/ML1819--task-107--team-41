@@ -1,6 +1,8 @@
 #!/usr/bin/python
+import json
 from langid.langid import LanguageIdentifier, model
-from py_translator import Translator
+
+
 '''
 This function contains code relevant to any transformations applied to text
 '''
@@ -24,7 +26,7 @@ def pruneGenderImbalance(data, pruneFileDest):
             json.dump(data, output2)
 def test(data):
     identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
-    translator = Translator()
+
     i=0
     listD=[]
     
