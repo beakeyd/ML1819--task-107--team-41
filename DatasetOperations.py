@@ -24,6 +24,20 @@ def pruneGenderImbalance(data, pruneFileDest):
 
     with open(pruneFileDest, 'w+') as output2:
             json.dump(data, output2)
+def genderPreProcessing(fileName):
+    i=0
+    with open(fileName) as data:
+        data =json.load(data)
+        for d in data:
+            if d["gender"] == "M":
+                d["gender"]=1
+            else:
+                d["gender"]=0
+            
+           
+        with open(fileName, 'w+') as output2:
+            json.dump(data, output2)
+    
 def test(data):
     identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
 
@@ -48,9 +62,10 @@ def main():
      #   data = json.load(data)
       #  pruneGenderImbalance(data, 'data/DavidsPruned.json')
     
-    with open('data/DavidsPruned.json') as data:
-        data=json.load(data)
-        test(data)
+    #with open('data/DavidsPruned.json') as data:
+     #   data=json.load(data)
+      #  test(data)
+    genderPreProcessing("data/Davids.json")
     
         
 

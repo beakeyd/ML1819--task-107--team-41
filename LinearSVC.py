@@ -18,7 +18,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import time
 from datetime import datetime as dt
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn import svm
+from sklearn.svm import  LinearSVC
 from sklearn import model_selection, preprocessing, linear_model, naive_bayes, metrics, svm
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics import classification_report, accuracy_score
@@ -68,40 +68,24 @@ def main():
     
     with open('data/Davids.json') as data:
        
-      
-        df=pandas.read_json(data)
-        df.dropna(axis=0)
-        df.set_index('id', inplace=True)
-        df.head()
-        #combinedFeatures("name", "description", df)
-        #combinedFeatures("name", "tweet", df)
-        #combinedFeatures("name", "screen_name", df)
-        #combinedFeatures("name", "created_at", df)
-        #combinedFeatures("tweet", "description", df)
-        #combinedThreeTextFeatures("tweet", "name", "description", df)
-        
-        # slice data
-    with open('data/Davids.json') as data:
         data = json.load(data)
+
+        # slice data
         created_at = [d["created_at"] for d in data]
         favourites_count = [d["favourites_count"]for d in data]
-        profile_background_color = [d["profile_background_color"] for d in data]
-        profile_link_color = [d["profile_link_color"] for d in data]
-        profile_sidebar_fill_color = [d["profile_sidebar_fill_color"] for d in data]
-        profile_text_color = [d["profile_text_color"] for d in data]
-        profile_sidebar_border_color = [d["profile_sidebar_border_color"] for d in data]
         listed_count = [d["listed_count"] for d in data]
         description = [d["description"] for d in data]
         tweet = [d["tweet"] for d in data]
         name = [d["name"] for d in data]
         screen_name = [d["screen_name"] for d in data]
-        gender = np.where(np.array([d["gender"] for d in data]) == 'M', 0, 1)
-       
+        gender = [d["gender"] for d in data]
+
         #testL = [[d["name"], d["description"]] for d in data]
 
         #create models, plot and then get accuracy of models
         created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
+        
         listed_acc = listed_count_model(listed_count, gender)   
         description_acc = description_model(description, gender)
         tweet_acc = tweet_model(tweet, gender)
@@ -110,6 +94,19 @@ def main():
         plotAccuracy(created_at_acc, favourites_acc,
                      listed_acc, description_acc,
                      tweet_acc, name_acc, 'Accuracy')
+    
+    with open('data/Davids.json') as data:
+        
+        df=pandas.read_json(data)
+        df.dropna(axis=0)
+        df.set_index('id', inplace=True)
+        df.head()
+        combinedFeatures("name", "description", df)
+        combinedFeatures("name", "tweet", df)
+        combinedFeatures("name", "screen_name", df)
+        combinedFeatures("name", "created_at", df)
+        combinedFeatures("tweet", "description", df)
+        combinedThreeTextFeatures("tweet", "name", "description", df)
     
    
       
@@ -157,8 +154,7 @@ def created_at_model(created_at, y):
     # create Model
     (X, Xscale) = normaliseData(np.array(created_at).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
-    clf = svm.NuSVC(kernel='poly', nu=.99)
-   
+    clf = LinearSVC(random_state=0, tol=1e-5)
     clf.fit(Xtrain, ytrain)
    # getCAndGamma(clf, Xtrain, ytrain, 'created_at_model')
     # make predicitions
@@ -178,7 +174,7 @@ def favourites_count_model(favourites_count, y):
     # create Model
     (X, _) = normaliseData(np.array(favourites_count).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y,test_size=0.1, random_state=42)
-    clf = svm.NuSVC(kernel='poly', degree=3, nu=.1)
+    clf = LinearSVC(random_state=0, tol=1e-5)
     #getCAndGamma(clf, X, y, 'favourites_count_model')
     clf.fit(Xtrain, ytrain)
     # make predicitions
@@ -198,7 +194,7 @@ def listed_count_model(listed_count, y):
     # create Model
     (X, _) = normaliseData(np.array(listed_count).reshape(-1,1))
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
-    clf = svm.NuSVC(kernel='poly', degree=3,nu= .1)
+    clf = LinearSVC(random_state=0, tol=1e-5)
    
     clf.fit(X, y)
 
@@ -263,11 +259,11 @@ def textClassification(X, y, gamma_val, C_val, name):
     
     #tf = TfidfVectorizer(smooth_idf=False, sublinear_tf=False, norm=None, analyzer='word')
     #Xtrain = tf.fit_transform(Xtrain)
-       
-    model = svm.SVC(kernel='poly', C=C_val, gamma=gamma_val)
+   
+    clf = LinearSVC(random_state=0, tol=1e-5)
 #    getCAndGamma(model, X, y, name)
-    model.fit(Xtrain, ytrain)
-    predY = model.predict(Xtest)
+    clf.fit(Xtrain, ytrain)
+    predY = clf.predict(Xtest)
     accuracy = accuracy_score(ytest, predY)
     print(accuracy)
     print(classification_report(ytest, predY))
@@ -329,9 +325,9 @@ def combinedFeatures(x1, x2,df):
     feature_processing.fit_transform(X_train)
     pipeline = Pipeline([
         ('features',feats),
-        ('classifier', svm.SVC(kernel='linear', C=1, gamma=1)),
+        ('classifier', LinearSVC(random_state=0, tol=1e-5)),
     ])
-    
+  
     # Fit and tune model
     pipeline.fit(X_train, y_train)
     preds=pipeline.predict(X_test)
@@ -384,7 +380,7 @@ def combinedThreeTextFeatures(x1, x2, x3,df):
     feature_processing.fit_transform(X_train)
     pipeline = Pipeline([
         ('features',feats),
-        ('classifier', svm.SVC(kernel='linear', C=10, gamma=1)),
+        ('classifier', LinearSVC(random_state=0, tol=1e-5)),
     ])
     
     # Fit and tune model
