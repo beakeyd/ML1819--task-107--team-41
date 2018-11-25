@@ -19,6 +19,7 @@ import time
 from datetime import datetime as dt
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.svm import  LinearSVC
+from sklearn.model_selection import KFold
 from sklearn import model_selection, preprocessing, linear_model, naive_bayes, metrics, svm
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics import classification_report, accuracy_score
@@ -71,29 +72,29 @@ def main():
         data = json.load(data)
 
         # slice data
-        created_at = [d["created_at"] for d in data]
-        favourites_count = [d["favourites_count"]for d in data]
-        listed_count = [d["listed_count"] for d in data]
-        description = [d["description"] for d in data]
-        tweet = [d["tweet"] for d in data]
-        name = [d["name"] for d in data]
-        screen_name = [d["screen_name"] for d in data]
-        gender = [d["gender"] for d in data]
+        created_at = np.array([d["created_at"] for d in data])
+        favourites_count = np.array([d["favourites_count"]for d in data])
+        listed_count = np.array([d["listed_count"] for d in data])
+        description = np.array([d["description"] for d in data])
+        tweet = np.array([d["tweet"] for d in data])
+        name = np.array([d["name"] for d in data])
+        screen_name = np.array([d["screen_name"] for d in data])
+        gender = np.array([d["gender"] for d in data])
 
         #testL = [[d["name"], d["description"]] for d in data]
 
         #create models, plot and then get accuracy of models
-        created_at_acc = created_at_model(created_at, gender)
+        #created_at_acc = created_at_model(created_at, gender)
         favourites_acc = favourites_count_model(favourites_count, gender)
         
-        listed_acc = listed_count_model(listed_count, gender)   
-        description_acc = description_model(description, gender)
-        tweet_acc = tweet_model(tweet, gender)
-        name_acc = name_model(name, gender)
+        #listed_acc = listed_count_model(listed_count, gender)   
+        #description_acc = description_model(description, gender)
+        #tweet_acc = tweet_model(tweet, gender)
+        #name_acc = name_model(name, gender)
 
-        plotAccuracy(created_at_acc, favourites_acc,
-                     listed_acc, description_acc,
-                     tweet_acc, name_acc, 'Accuracy')
+        #plotAccuracy(created_at_acc, favourites_acc,
+         #            listed_acc, description_acc,
+          #           tweet_acc, name_acc, 'Accuracy')
     
     with open('data/Davids.json') as data:
         
@@ -101,16 +102,22 @@ def main():
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        combinedFeatures("name", "description", df)
-        combinedFeatures("name", "tweet", df)
-        combinedFeatures("name", "screen_name", df)
-        combinedFeatures("name", "created_at", df)
-        combinedFeatures("tweet", "description", df)
-        combinedThreeTextFeatures("tweet", "name", "description", df)
+        #combinedFeatures("name", "description", df)
+        #combinedFeatures("name", "tweet", df)
+        #combinedFeatures("name", "screen_name", df)
+        #combinedFeatures("name", "created_at", df)
+        #combinedFeatures("tweet", "description", df)
+        #combinedThreeTextFeatures("tweet", "name", "description", df)
     
    
       
-        
+#https://scikit-learn.org/stable/auto_examples/ensemble/plot_gradient_boosting_oob.html#sphx-glr-auto-examples-ensemble-plot-gradient-boosting-oob-py
+def heldout_score(clf, X_test, y_test):
+    """compute deviance scores on ``X_test`` and ``y_test``. """
+    score = np.zeros((n_estimators,), dtype=np.float64)
+    for i, y_pred in enumerate(clf.staged_decision_function(X_test)):
+        score[i] = clf.loss_(y_test, y_pred)
+    return score        
 
 def normaliseData(x):
    
@@ -172,23 +179,32 @@ def created_at_model(created_at, y):
 
 def favourites_count_model(favourites_count, y):
     # create Model
-    (X, _) = normaliseData(np.array(favourites_count).reshape(-1,1))
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y,test_size=0.1, random_state=42)
-    clf = LinearSVC(random_state=0, tol=1e-5)
-    #getCAndGamma(clf, X, y, 'favourites_count_model')
-    clf.fit(Xtrain, ytrain)
-    # make predicitions
-    predY = clf.predict(Xtest.reshape(-1,1))
+    (X, _) = normaliseData(favourites_count.reshape(-1,1))
+    kf=KFold(n_splits=10, shuffle=True, random_state=42)
+    mean=0
+    i=0
+    
+   
+    clf = LinearSVC(random_state=42, tol=1e-6, max_iter=10000)
+    print (cross_val_score(clf, favourites_count.reshape(-1,1), y, cv=kf,n_jobs=-1))
+    #clf.fit(Xtrain, ytrain)
+    #scores+=heldout_s
+    #make predicitions
+    #predY = clf.predict(Xtest.reshape(-1,1))
     #plot data, get and return accuracy of model
-    print('favourites_count Model metrics: ')
-    print(classification_report(ytest, predY))
-    plotSingleFeatureData(Xtest, ytest, predY, 'Favourites_Count', 'Number of Favourites on User Tweets - Scaled between 0-1')
+    #print('favourites_count Model metrics: ')
+    #print(classification_report(ytest, predY))
+    #plotSingleFeatureData(Xtest, ytest, predY, 'Favourites_Count', 'Number of Favourites on User Tweets - Scaled between 0-1')
 
-    accuracy = accuracy_score(ytest, predY)
-    print(str(accuracy))
- #   predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
-    accuracy = accuracy_score(ytest, predY)
-    return accuracy
+    #accuracy = accuracy_score(ytest, predY)
+    
+    #mean+=accuracy
+    i+=1
+        
+    acc=mean/i
+    #print(acc)
+    #print(i)   
+    return 0
 
 def listed_count_model(listed_count, y):
     # create Model
