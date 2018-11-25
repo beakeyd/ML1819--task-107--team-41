@@ -58,7 +58,7 @@ class NumberSelector(BaseEstimator, TransformerMixin):
 
 def main():
     
-    with open('data/twitter_gender_data.json') as data:
+    with open('data/original_dataset.json') as data:
        
         data = json.load(data)
 
