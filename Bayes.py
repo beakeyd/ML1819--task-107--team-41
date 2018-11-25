@@ -26,7 +26,7 @@ def bayes(tweetTrain, tweetTest, genderTrain, genderTest):
     print(str(accuracy))   
 
 def main():
-    with open('data/twitter_gender_data.json') as data:
+    with open('data/original_dataset.json') as data:
        
         data = json.load(data)
         description = [d["description"] for d in data]

@@ -6,16 +6,16 @@ technique on all forms of data (numberical+text)
 
 
 
-#!/usr/bin/python
 try:
     import json
 except ImportError:
     import simplejson as json
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, cross_val_predict
 from mpl_toolkits.mplot3d import Axes3D
 import time
+
 from datetime import datetime as dt
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.svm import  LinearSVC
@@ -36,6 +36,7 @@ import re
 from nltk.corpus import stopwords
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import RandomForestClassifier
+from matplotlib import pyplot as plt
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
 class TextSelector(BaseEstimator, TransformerMixin):
     """
@@ -67,7 +68,7 @@ class NumberSelector(BaseEstimator, TransformerMixin):
 
 def main():
     
-    with open('data/Davids.json') as data:
+    with open('data/original_dataset.json') as data:
        
         data = json.load(data)
 
@@ -81,22 +82,22 @@ def main():
         screen_name = np.array([d["screen_name"] for d in data])
         gender = np.array([d["gender"] for d in data])
 
-        #testL = [[d["name"], d["description"]] for d in data]
+       
 
         #create models, plot and then get accuracy of models
-        #created_at_acc = created_at_model(created_at, gender)
-        favourites_acc = favourites_count_model(favourites_count, gender)
+        #created_at_acc = simpleFeature(created_at, gender)
+        favourites_acc = simpleFeature(favourites_count, gender)
         
-        #listed_acc = listed_count_model(listed_count, gender)   
-        #description_acc = description_model(description, gender)
-        #tweet_acc = tweet_model(tweet, gender)
-        #name_acc = name_model(name, gender)
+        #listed_acc = simpleFeature(listed_count, gender)   
+        #description_acc = textClassification(description, gender)
+        #tweet_acc = textClassification(tweet, gender)
+        #name_acc = textClassification(name, gender)
 
         #plotAccuracy(created_at_acc, favourites_acc,
          #            listed_acc, description_acc,
           #           tweet_acc, name_acc, 'Accuracy')
     
-    with open('data/Davids.json') as data:
+    with open('data/original_dataset.json') as data:
         
         df=pandas.read_json(data)
         df.dropna(axis=0)
@@ -108,16 +109,8 @@ def main():
         #combinedFeatures("name", "created_at", df)
         #combinedFeatures("tweet", "description", df)
         #combinedThreeTextFeatures("tweet", "name", "description", df)
-    
-   
-      
-#https://scikit-learn.org/stable/auto_examples/ensemble/plot_gradient_boosting_oob.html#sphx-glr-auto-examples-ensemble-plot-gradient-boosting-oob-py
-def heldout_score(clf, X_test, y_test):
-    """compute deviance scores on ``X_test`` and ``y_test``. """
-    score = np.zeros((n_estimators,), dtype=np.float64)
-    for i, y_pred in enumerate(clf.staged_decision_function(X_test)):
-        score[i] = clf.loss_(y_test, y_pred)
-    return score        
+
+
 
 def normaliseData(x):
    
@@ -177,115 +170,54 @@ def created_at_model(created_at, y):
     
     return accuracy
 
-def favourites_count_model(favourites_count, y):
-    # create Model
-    (X, _) = normaliseData(favourites_count.reshape(-1,1))
+
+
+    
+def simpleFeature(X, y):
+    (X, _) = normaliseData(X.reshape(-1,1))
+    kf=KFold(n_splits=10, shuffle=True, random_state=42)
+    clf = LinearSVC(random_state=42, tol=1e-6, max_iter=1000)
+    clf=hyperParameterTuning(clf, kf)
+
+    accuracy=cross_val_score(clf, X.reshape(-1,1), y, cv=kf,n_jobs=-1)
+    print(clf.best_params_)
+    print (cross_val_score(clf, X.reshape(-1,1), y, cv=kf,n_jobs=-1,scoring='recall'))
+    print (cross_val_score(clf, X.reshape(-1,1), y, cv=kf,n_jobs=-1,scoring='precision'))
+    predictions = cross_val_predict(clf, X, y, cv=kf)
+    
+    print(classification_report(y, predictions))
+    return accuracy
+
+
+def textClassification(X, y):
+    # create a dataframe using texts and lables
+    
+
     kf=KFold(n_splits=10, shuffle=True, random_state=42)
     mean=0
     i=0
-    
-   
-    clf = LinearSVC(random_state=42, tol=1e-6, max_iter=10000)
-    print (cross_val_score(clf, favourites_count.reshape(-1,1), y, cv=kf,n_jobs=-1))
-    #clf.fit(Xtrain, ytrain)
-    #scores+=heldout_s
-    #make predicitions
-    #predY = clf.predict(Xtest.reshape(-1,1))
-    #plot data, get and return accuracy of model
-    #print('favourites_count Model metrics: ')
-    #print(classification_report(ytest, predY))
-    #plotSingleFeatureData(Xtest, ytest, predY, 'Favourites_Count', 'Number of Favourites on User Tweets - Scaled between 0-1')
-
-    #accuracy = accuracy_score(ytest, predY)
-    
-    #mean+=accuracy
-    i+=1
+    for trainIndex, testIndex in kf.split(X):
+        Xtrain, Xtest=X[trainIndex], X[testIndex]
         
-    acc=mean/i
-    #print(acc)
-    #print(i)   
-    return 0
+        ytrain, ytest=y[trainIndex], y[testIndex]
+        vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
+        Xtrain = vectorizer.fit_transform(Xtrain)
+        Xtest = vectorizer.transform(Xtest)
+        clf = LinearSVC(random_state=42, tol=1e-6, max_iter=1000)
+        clf.fit(Xtrain, ytrain)
+        predY=clf.predict(Xtest)
+        accuracy=accuracy_score(ytest, predY)
+        mean+=accuracy
+        
+        
+        #plt.show()
+    mean=mean/10
+    print(mean)
+    
 
-def listed_count_model(listed_count, y):
-    # create Model
-    (X, _) = normaliseData(np.array(listed_count).reshape(-1,1))
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
-    clf = LinearSVC(random_state=0, tol=1e-5)
-   
-    clf.fit(X, y)
 
-    # make predicitions
-    predY = clf.predict(Xtest.reshape(-1,1))
-    #plot data, get and return accuracy of model
-   
-   
-    print(classification_report(ytest, predY))
-    #plotSingleFeatureData(Xtest, ytest, predY, 'Listed_Count', 'Number of Lists User appears on - Scaled between 0-1')
-    
-    accuracy = accuracy_score(ytest, predY)
-    print(str(accuracy))
-  #  predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
-    accuracy = accuracy_score(ytest, predY)
-    return accuracy
-
-''' 
-    Models that ARE doing text classification
-'''
-
-def description_model(description, gender):
-    print('Description Model Metrics: ')
-    Xtest, ytest, predY = textClassification(description, gender, 0.5, 4, 'description_model')
-    
-   
-    
-    accuracy = accuracy_score(ytest, predY)
-   
-    return accuracy
-
-def tweet_model(tweet, gender):
-    print('Tweet Model Metrics: ')
-    Xtest, ytest, predY = textClassification(tweet, gender, 0.1, 10, 'tweet_model')
     
     
-    
-    accuracy = accuracy_score(ytest, predY)
-
-    return accuracy
-    
-def name_model(name, gender):
-    print('Name Model Metrics: ')
-    Xtest, ytest, predY = textClassification(name, gender, 0.35, 7, 'name_model')
-   
-    accuracy = accuracy_score(ytest, predY)
-    
-    return accuracy
-
-def textClassification(X, y, gamma_val, C_val, name):
-    # create a dataframe using texts and lables
-    trainDF = pandas.DataFrame()
-    trainDF['text'] = X
-    trainDF['label'] = y
-
-    # split the dataset into training and validation datasets 
-    
-    Xtrain, Xtest, ytrain, ytest = model_selection.train_test_split(trainDF['text'], trainDF['label'], test_size=0.1, random_state=42)
-    vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
-    Xtrain = vectorizer.fit_transform(Xtrain)
-    Xtest = vectorizer.transform(Xtest)
-    
-    #tf = TfidfVectorizer(smooth_idf=False, sublinear_tf=False, norm=None, analyzer='word')
-    #Xtrain = tf.fit_transform(Xtrain)
-   
-    clf = LinearSVC(random_state=0, tol=1e-5)
-#    getCAndGamma(model, X, y, name)
-    clf.fit(Xtrain, ytrain)
-    predY = clf.predict(Xtest)
-    accuracy = accuracy_score(ytest, predY)
-    print(accuracy)
-    print(classification_report(ytest, predY))
-    #if(name=="tweet_model"):
-     #   getCAndGamma(model, Xtrain, ytrain, "test")
-
     
   
     
@@ -354,7 +286,23 @@ def combinedFeatures(x1, x2,df):
     
     #printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
         
+def hyperParameterTuning(model, kv):
+    hyperparameters={
+        "C": [0.01, .1, 1, 10],
+        "dual": [True,False],
+        "fit_intercept": [True, False],
+        "intercept_scaling": [.1, 1, 10],
+        "loss": ["hinge", "squared_hinge"],
+        "max_iter": [100, 1000, 10000],
+        "multi_class": ["ovr", "crammer_singer"],
+      
+        "tol": [1e-4, 1e-5, 1e-6, 1e-7]
+
+
+    }
+    clf=GridSearchCV(model, hyperparameters, cv=kv )
     
+    return clf
 
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
 def combinedThreeTextFeatures(x1, x2, x3,df):

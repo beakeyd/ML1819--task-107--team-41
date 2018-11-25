@@ -1269,3 +1269,90 @@ Not authorized.301883415
 Not authorized.745543
 Not authorized.315711574
 Not authorized.239624773
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for +=: 'dict' and 'int'134774789
+unsupported operand type(s) for +=: 'dict' and 'int'269385744
+unsupported operand type(s) for /: 'dict' and 'int'134774789
+unsupported operand type(s) for /: 'dict' and 'int'269385744
+Not authorized.83427985
+Not authorized.259582931
+Not authorized.150282344
+Not authorized.318953245
+Not authorized.85560804
+Not authorized.49745904
+Not authorized.45584737
+Not authorized.104928190
+Not authorized.20518552
+Not authorized.52730406
+Not authorized.322510387
+Not authorized.338697797
+Not authorized.324804239
+Not authorized.429728993
+Not authorized.102981779
+Not authorized.283125549
+Not authorized.404662977
+Not authorized.231420563
+Not authorized.52867738
+Not authorized.345454128
+Not authorized.422753843
+Not authorized.60372696
+Not authorized.472004609
+Not authorized.183974161
+Not authorized.291717068
+Not authorized.44351623
+Not authorized.115460094
+Not authorized.203278366
+Not authorized.548446238
+Not authorized.62376198
+Not authorized.288345231
+Not authorized.306957807
+Not authorized.38555735
+Not authorized.190369909
+Not authorized.322032405
+Not authorized.200397920
+Not authorized.411915399
+Not authorized.359225130
+Not authorized.545743883
+Not authorized.477673932
+Not authorized.19979564
+Not authorized.23846289
+Not authorized.371088826
+Not authorized.301883415
+Not authorized.745543
+Not authorized.315711574
+Not authorized.239624773
+Not authorized.383920413
+Not authorized.378299776
+Not authorized.212231677
+Not authorized.236382598
+Not authorized.296075780
+Not authorized.142109401
+Not authorized.515206115
+Not authorized.153480875
+Not authorized.233074524
+Not authorized.124776290
+Not authorized.214135349
+Not authorized.321057841
+Not authorized.346781465
+Not authorized.203086531
+Not authorized.383286086
+Not authorized.270564273
+Not authorized.82738460
+Not authorized.86506863
+Not authorized.475398066
+Not authorized.368574102

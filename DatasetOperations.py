@@ -38,23 +38,8 @@ def genderPreProcessing(fileName):
         with open(fileName, 'w+') as output2:
             json.dump(data, output2)
     
-def test(data):
-    identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
 
-    i=0
-    listD=[]
-    
-    for d in data:
-       
-        tweet=d["tweet"]
-        tweetEncode=tweet.encode('utf-8')
-        
-        lang=(identifier.classify(tweet))[0]
-        if not lang =="en":
-            i+=1
-        #print(len(listD))
 
-    print(i)
 
 def main():
     fileToPrune='data/twitter_gender_data_original.json'
