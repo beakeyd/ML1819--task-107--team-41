@@ -52,8 +52,6 @@ def removeUnicodeAndLangId(data):
         
         for tweet in data[d]:  
                    
-           
-            
             tweet=tweet.encode('ascii', 'ignore').decode("utf-8")
             lang=(identifier.classify(tweet))[0]
             if lang=="en":
