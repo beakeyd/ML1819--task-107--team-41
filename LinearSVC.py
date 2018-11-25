@@ -297,15 +297,12 @@ def hyperParameterTuning(model, kv):
         "multi_class": ["ovr", "crammer_singer"],
       
         "tol": [1e-4, 1e-5, 1e-6, 1e-7]
-
-
     }
-    clf=GridSearchCV(model, hyperparameters, cv=kv )
-    
+    clf=GridSearchCV(model, hyperparameters, cv=kv)
     return clf
 
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
-def combinedThreeTextFeatures(x1, x2, x3,df):
+def combinedThreeTextFeatures(x1, x2, x3, df):
     print(x1+" and "+x2+" and "+x3)
     graphName=(str(x1+" and "+x2))
     
