@@ -289,8 +289,7 @@ def combinedFeatures(x1, x2,df):
 def hyperParameterTuning(model, kv):
     hyperparameters={
         "C": [0.01, .1, 1, 10],
-        "dual": [True,False],
-        "fit_intercept": [True, False],
+        
         "intercept_scaling": [.1, 1, 10],
         "loss": ["hinge", "squared_hinge"],
         "max_iter": [100, 1000, 10000],

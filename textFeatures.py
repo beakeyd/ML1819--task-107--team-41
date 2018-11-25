@@ -61,7 +61,7 @@ def removeUnicodeAndLangId(data):
         if not len(listTweet) == 0 :   
             copy[d]=listTweet
         
-    with open('data/pruned_language_unicode.json', 'w') as output1:
+    with open('data/twitter_tweets_no_unicode.json', 'w') as output1:
                 json.dump(copy, output1)
 
 #this function strips the main dataset 
