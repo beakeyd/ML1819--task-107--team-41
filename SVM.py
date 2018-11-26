@@ -255,12 +255,12 @@ def simpleFeature(X, y, name):
         
     hyperparameters={
        
-        "gamma": [ .1, .5, 1, 10]
+        "gamma": [ .1, .5, .9]
         ,
         
         "kernel": ["poly", "rbf"],
        
-        "nu": [.01, .1, .5, 1],
+        "nu": [.01, .1, .5, .9],
       
         "degree": [2,3, 4]
 
@@ -310,12 +310,12 @@ def textClassification(X, y, name):
         
         hyperparameters={
         
-        "gamma": [ .1, .5, 1, 10]
+        "C": [ .1, .5, 1, 10]
         ,
         
         "kernel": ["poly", "rbf"],
        
-        "C": [.01, .1, .5, 1],
+        "gamma": [.01, .1, .5, 1],
       
         "degree": [2,3, 4]
 

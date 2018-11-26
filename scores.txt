@@ -1,0 +1,25 @@
+scores for Favourites Countaccuracy: 0.4938765667829708 recall: 0.8455137345204966 precision: 0.44672662896026816
+scores for Listed Countaccuracy: 0.5364089112857586 recall: 0.17318488806006643 precision: 0.6357508462852176
+scores for Description
+accuracy: 0.6162881453521847 recall: 0.4781049439050561 precision: 0.6605023442285589
+scores for Tweet
+accuracy: 0.5591630044832016 recall: 0.5837974693031492 precision: 0.556278559665391
+scores for name
+accuracy: 0.680010383704965 recall: 0.45101692281230504 precision: 0.8321573995217048
+scores for Screen Name
+accuracy: 0.680010383704965 recall: 0.45101692281230504 precision: 0.8321573995217048
+scores for name and description
+accuracy: 0.7084639498432602 recall: 0.6234177215189873 precision: 0.7462121212121212
+scores for name and tweet
+accuracy: 0.6614420062695925 recall: 0.6487341772151899 precision: 0.6612903225806451
+scores for name and screen_name
+accuracy: 0.6739811912225705 recall: 0.44936708860759494 precision: 0.8068181818181818
+scores for name and created_at
+accuracy: 0.6849529780564263 recall: 0.47151898734177217 precision: 0.8142076502732241
+scores for tweet and description
+accuracy: 0.6238244514106583 recall: 0.6044303797468354 precision: 0.6241830065359477
+scores for tweet and name
+accuracy: 0.670846394984326 recall: 0.6360759493670886 precision: 0.6790540540540541
+scores for hashtag num accuracy: 0.5362295909354733 recall: 0.35359199455282486 precision: 0.5690533847742703
+scores for hashtag num 
+accuracy: 0.6484800015797321 recall: 0.4928458395941059 precision: 0.7168641871884985
