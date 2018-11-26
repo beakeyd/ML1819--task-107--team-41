@@ -42,9 +42,7 @@ def removeNonEnglish(data):
 #This function strips tweets only
 def removeUnicodeAndLangId(data):
     identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
-
     i=0
- 
     j=0
     copy={}
     for d in data:
@@ -93,10 +91,6 @@ def stripRest(data):
         
     with open('data/original_dataset_nounicode.json', 'w') as output1:
                 json.dump(copy, output1)
-       
-             
-    
-
 
 def main():
   
@@ -109,15 +103,6 @@ def main():
     #with open('data/original_dataset.json') as data:
     #    data=json.load(data)
     #    stripRest(data)
-
-
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     main()

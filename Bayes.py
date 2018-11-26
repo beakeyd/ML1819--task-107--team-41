@@ -36,9 +36,9 @@ def main():
                 for val in value:
                     text_arr.append(val)
                     if gender_data[key] == 'M':
-                        gender_arr.append(0)
-                    else:
                         gender_arr.append(1)
+                    else:
+                        gender_arr.append(0)
             
             Ttrain, Ttest, Gtrain, Gtest = train_test_split(text_arr, gender_arr, test_size=0.33, random_state=42)
             bayes(Ttrain, Ttest, Gtrain, Gtest)

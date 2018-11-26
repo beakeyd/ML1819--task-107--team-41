@@ -81,7 +81,7 @@ def main():
         name = np.array([d["name"] for d in data])
         screen_name = np.array([d["screen_name"] for d in data])
         gender = np.array([d["gender"] for d in data])
-        print(gender)
+      
        
 
         #create models, plot and then get accuracy of models
