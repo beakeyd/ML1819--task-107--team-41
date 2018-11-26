@@ -68,7 +68,7 @@ class NumberSelector(BaseEstimator, TransformerMixin):
 
 def main():
     
-    with open('data/original_dataset.json') as data:
+    with open('data/original_dataset_nounicode.json') as data:
        
         data = json.load(data)
 
@@ -86,34 +86,34 @@ def main():
 
         #create models, plot and then get accuracy of models
         #created_at_acc = simpleFeature(created_at, gender, "Created At")
-        #favourites_acc = simpleFeature(favourites_count, gender, "Favourites Count")
+        favourites_acc = simpleFeature(favourites_count, gender, "Favourites Count")
         
-        #listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
-        #description_acc = textClassification(description, gender, "Description")
-        #tweet_acc = textClassification(tweet, gender, "Tweet")
-        #name_acc = textClassification(name, gender, "name")
-        #screen_name = textClassification(name, gender, "Screen Name")
+        listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
+        description_acc = textClassification(description, gender, "Description")
+        tweet_acc = textClassification(tweet, gender, "Tweet")
+        name_acc = textClassification(name, gender, "name")
+        screen_name = textClassification(name, gender, "Screen Name")
 
         #plotAccuracy(created_at_acc, favourites_acc,
         #            listed_acc, description_acc,
         #            tweet_acc, name_acc, 'Accuracy')
     
-    with open('data/original_dataset.json') as data:
+    with open('data/original_dataset_nounicode.json') as data:
         
         df=pandas.read_json(data)
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        #combinedFeatures("name", "description", df)
-        #combinedFeatures("name", "tweet", df)
-        #combinedFeatures("name", "screen_name", df)
-        #combinedFeatures("name", "created_at", df)
-        #combinedFeatures("tweet", "description", df)
-        #combinedThreeTextFeatures("tweet", "name", "description", df)
+        combinedFeatures("name", "description", df)
+        combinedFeatures("name", "tweet", df)
+        combinedFeatures("name", "screen_name", df)
+        combinedFeatures("name", "created_at", df)
+        combinedFeatures("tweet", "description", df)
+        combinedThreeTextFeatures("tweet", "name", "description", df)
     with open("data/numb_Hashtag.json") as data, open("data/gender.json") as data2:
         data = json.load(data)
         data2 =json.load(data2)
-       # accuracy=hashtagNum(data, data2, "hashtag num ")
+        accuracy=hashtagNum(data, data2, "hashtag num ")
     with open("data/twitter_Hashtag.json") as data, open("data/gender.json") as data2:
         data = json.load(data)
         data2 =json.load(data2)
@@ -195,8 +195,7 @@ def hashtagNum( data, data2,name):
           
     X=np.array(X)
     y=np.array(y)
-    print(X)
-    print(y)
+  
     simpleFeature(X, y, name)
     print("Model is " + name)
     return 0
@@ -217,8 +216,7 @@ def hashtagText( data, data2,name):
           
     X=np.array(X)
     y=np.array(y)
-    print(X)
-    print(y)
+   
     textClassification(X, y, name)
     print("Model is " + name)
     return 0
@@ -236,13 +234,13 @@ def simpleFeature(X, y, name):
     model = LinearSVC(random_state=42)
     hyperparameters={
         "C": [ .1, 1, 10]
-        #,
+        ,
         
-        #"intercept_scaling": [.1, 1, 10],
+        "intercept_scaling": [.1, 1, 10],
        
-      #  "max_iter": [100, 1000, 10000],
+        "max_iter": [100, 1000, 10000],
       
-       # "tol": [1e-4, 1e-5, 1e-6]
+        "tol": [1e-4, 1e-5, 1e-6]
 
 
         }
@@ -284,13 +282,13 @@ def textClassification(X, y, name):
         clf = LinearSVC(random_state=42, tol=1e-6, max_iter=1000)
         hyperparameters={
         "C": [ .1, 1, 10]
-        #,
+        ,
         
-        #"intercept_scaling": [.1, 1, 10],
+        "intercept_scaling": [.1, 1, 10],
        
-        #"max_iter": [100, 1000, 10000],
+        "max_iter": [100, 1000, 10000],
       
-        #"tol": [1e-4, 1e-5, 1e-6]
+        "tol": [1e-4, 1e-5, 1e-6]
 
 
         }
@@ -375,13 +373,13 @@ def combinedFeatures(x1, x2,df):
     ])
     hyperparameters={
         "classifier__C": [ .1, 1, 10]
-        #,
+        ,
         
-        #"classifier__intercept_scaling": [.1, 1, 10],
+        "classifier__intercept_scaling": [.1, 1, 10],
        
-      #  "classifier__max_iter": [100, 1000, 10000],
+        "classifier__max_iter": [100, 1000, 10000],
       
-       # "classifier__tol": [1e-4, 1e-5, 1e-6]
+        "classifier__tol": [1e-4, 1e-5, 1e-6]
 
 
         }
@@ -449,13 +447,13 @@ def combinedThreeTextFeatures(x1, x2, x3,df):
     ])
     hyperparameters={
         "classifier__C": [ .1, 1, 10]
-        #,
+        ,
         
-        #"classifier__intercept_scaling": [.1, 1, 10],
+        "classifier__intercept_scaling": [.1, 1, 10],
        
-      #  "classifier__max_iter": [100, 1000, 10000],
+        "classifier__max_iter": [100, 1000, 10000],
       
-       # "classifier__tol": [1e-4, 1e-5, 1e-6]
+        "classifier__tol": [1e-4, 1e-5, 1e-6]
 
 
         }

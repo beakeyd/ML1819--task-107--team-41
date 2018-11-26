@@ -1,0 +1,5 @@
+scores for Favourites Countaccuracy: 0.507691815573589 recall: 0.4248624510063442 precision: 0.5094648338879073
+scores for Listed Countaccuracy: 0.5130258903657918 recall: 0.6155081078275357 precision: 0.5117480471963076
+scores for favourites_count and listed_count
+accuracy: 0.5501567398119123 recall: 0.41455696202531644 precision: 0.5622317596566524
+scores for hashtag num accuracy: 0.5336861230978877 recall: 0.4897734910195627 precision: 0.5371080374056871
