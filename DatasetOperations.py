@@ -50,7 +50,7 @@ def main():
     #with open('data/DavidsPruned.json') as data:
      #   data=json.load(data)
       #  test(data)
-    genderPreProcessing("data/Davids.json")
+    genderPreProcessing("data/original_dataset.json")
     
         
 

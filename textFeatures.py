@@ -91,7 +91,7 @@ def stripRest(data):
        
     
         
-    with open('data/DavidsPrunedNoUnicode.json', 'w') as output1:
+    with open('data/original_dataset_nounicode.json', 'w') as output1:
                 json.dump(copy, output1)
        
              
@@ -103,12 +103,12 @@ def main():
    
     
     
-    #with open('data/twitter_tweets_pruned.json') as data:
-    #    data=json.load(data)
-     #   removeUnicodeAndLangId(data)
-    with open('data/DavidsPruned.json') as data:
+    with open('data/twitter_tweets_pruned.json') as data:
         data=json.load(data)
-        stripRest(data)
+        removeUnicodeAndLangId(data)
+    #with open('data/original_dataset.json') as data:
+    #    data=json.load(data)
+    #    stripRest(data)
 
 
 

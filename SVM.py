@@ -5,10 +5,11 @@ except ImportError:
     import simplejson as json
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, cross_val_predict
 from mpl_toolkits.mplot3d import Axes3D
 import time
 from datetime import datetime as dt
+from sklearn.model_selection import KFold
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn import svm
 from sklearn import model_selection, preprocessing, linear_model, naive_bayes, metrics, svm
@@ -63,36 +64,28 @@ def main():
         data = json.load(data)
 
         # slice data
-        created_at = [d["created_at"] for d in data]
-        favourites_count = [d["favourites_count"]for d in data]
-        profile_background_color = [d["profile_background_color"] for d in data]
-        profile_link_color = [d["profile_link_color"] for d in data]
-        profile_sidebar_fill_color = [d["profile_sidebar_fill_color"] for d in data]
-        profile_text_color = [d["profile_text_color"] for d in data]
-        profile_sidebar_border_color = [d["profile_sidebar_border_color"] for d in data]
-        listed_count = [d["listed_count"] for d in data]
-        description = [d["description"] for d in data]
-        tweet = [d["tweet"] for d in data]
-        name = [d["name"] for d in data]
-        screen_name = [d["screen_name"] for d in data]
-        gender = np.where(np.array([d["gender"] for d in data]) == 'M', 0, 1)
+        created_at = np.array([d["created_at"] for d in data])
+        favourites_count = np.array([d["favourites_count"]for d in data])
+        listed_count = np.array([d["listed_count"] for d in data])
+        description = np.array([d["description"] for d in data])
+        tweet = np.array([d["tweet"] for d in data])
+        name = np.array([d["name"] for d in data])
+        screen_name = np.array([d["screen_name"] for d in data])
+        gender = np.array([d["gender"] for d in data])
 
         #testL = [[d["name"], d["description"]] for d in data]
 
         #create models, plot and then get accuracy of models
-        created_at_acc = created_at_model(created_at, gender)
-        favourites_acc = favourites_count_model(favourites_count, gender)
-        color_acc = color_model(profile_background_color, profile_sidebar_fill_color,
-                                profile_text_color,
-                                profile_link_color, gender)
-        listed_acc = listed_count_model(listed_count, gender)   
-        description_acc = description_model(description, gender)
-        tweet_acc = tweet_model(tweet, gender)
-        name_acc = name_model(name, gender)
+        #created_at_acc = created_at_model(created_at, gender)
+        #favourites_acc = favourites_count_model(favourites_count, gender)
+        listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
+        #description_acc = description_model(description, gender)
+        #tweet_acc = tweet_model(tweet, gender)
+        #name_acc = name_model(name, gender)
 
-        plotAccuracy(created_at_acc, favourites_acc,
-                     color_acc, listed_acc, description_acc,
-                     tweet_acc, name_acc, 'Accuracy')
+        #plotAccuracy(created_at_acc, favourites_acc,
+         #            color_acc, listed_acc, description_acc,
+         #            tweet_acc, name_acc, 'Accuracy')
     
     with open('data/twitter_gender_data.json') as data:
         
@@ -100,12 +93,12 @@ def main():
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        combinedFeatures("name", "description", df)
-        combinedFeatures("name", "tweet", df)
-        combinedFeatures("name", "screen_name", df)
-        combinedFeatures("name", "created_at", df)
-        combinedFeatures("tweet", "description", df)
-        combinedThreeTextFeatures("tweet", "name", "description", df)
+        #combinedFeatures("name", "description", df)
+        #combinedFeatures("name", "tweet", df)
+        #combinedFeatures("name", "screen_name", df)
+        #combinedFeatures("name", "created_at", df)
+        #combinedFeatures("tweet", "description", df)
+        #combinedThreeTextFeatures("tweet", "name", "description", df)
         
         
 
@@ -114,15 +107,15 @@ def normaliseData(x):
     return (x/scale, scale)
 
 def plotAccuracy(created_at_acc, favourites_acc,
-                 color_acc, listed_acc, description_acc,
+                  listed_acc, description_acc,
                  tweet_acc, name_acc, graph_name):
     
     y = (created_at_acc, favourites_acc,
-         color_acc, listed_acc, description_acc,
+         listed_acc, description_acc,
          tweet_acc, name_acc)
 
     X_axis = ['created_at', 'favourites',
-              'color', 'listed', 'description',
+               'listed', 'description',
               'tweet', 'name']
 
     y_pos = np.arange(len(X_axis))
@@ -191,30 +184,7 @@ def created_at_model(created_at, y):
     
     return accuracy
 
-def color_model(profile_background_color, profile_sidebar_fill_color,
-                profile_text_color, profile_sidebar_border_color, gender):
-    (X1, scale) = normaliseData(np.array([int(x, 16) for x in profile_background_color]).reshape(-1,1))
-    (X2, _) = normaliseData( np.array([int(x, 16) for x in profile_sidebar_fill_color]).reshape(-1,1))
-    (X3, _) = normaliseData(np.array([int(x, 16) for x in profile_text_color]).reshape(-1,1))
-    (X4, _) = normaliseData(np.array([int(x, 16) for x in profile_sidebar_border_color]).reshape(-1,1))
-    X=np.column_stack((X1, X2))
-    # create Model
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, gender, test_size=0.1, random_state=42)
-    clf = svm.NuSVC(kernel='poly', nu=.7)
-    #getCAndGamma(clf, Xtest, ytest, 'color_model')
-    clf.fit(Xtrain, ytrain)
 
-    # make predicitions
-    predY = clf.predict(Xtest)
-    #plot data, get and return accuracy of model
-    print('color Model metrics: ')
-    print(classification_report(ytest, predY))
-    #plotMultiFeatureData(Xtest, ytest, predY, scale, clf, 'Color')
-    accuracy = accuracy_score(ytest, predY)
-    print(str(accuracy))
-   # predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
-    accuracy = accuracy_score(ytest, predY)
-    return accuracy  
 
 def favourites_count_model(favourites_count, y):
     # create Model
@@ -235,6 +205,50 @@ def favourites_count_model(favourites_count, y):
  #   predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
     accuracy = accuracy_score(ytest, predY)
     return accuracy
+
+#nested vs non nested sklearn tutorial    
+#nested vs non nested sklearn tutorial    
+def simpleFeature(X, y, name):
+    print(X)
+    print(y)
+    print("Model is " + name)
+    if(name=="hashtag num "):
+        X  = X.reshape(-1,1)
+    else:
+        (X, _) = normaliseData(X.reshape(-1,1))
+    innerCV=KFold(n_splits=5, shuffle=True, random_state=42)
+    outerCV=KFold(n_splits=10, shuffle=True, random_state=21)
+
+    model = svm.SVC(random_state=42)
+    hyperparameters={
+        "C": [ .1, 1]
+        ,
+        
+        "kernel": ["poly"],
+       
+        "gamma": [.01, .1],
+      
+        "degree": [2,3]
+
+
+        }
+    clf= GridSearchCV(estimator=model, param_grid=hyperparameters, cv=innerCV )
+    accuracy=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,n_jobs=-1)
+   
+    recall=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,n_jobs=-1,scoring='recall')
+    precision=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,n_jobs=-1,scoring='precision')
+    predictions = cross_val_predict(clf, X, y, cv=outerCV)
+    
+    plotSingleFeatureData(X, y, predictions, name, name+'- Scaled between 0-1')
+    f=open("SVM scores.txt", "a+")
+    f.write("scores for "+name)
+    f.write("accuracy: "+str(np.mean(accuracy))+" recall: "+str(np.mean(recall))+" precision: "+str(np.mean(precision))+"\n")
+    f.close()
+
+  
+    print(classification_report(y, predictions))
+    return accuracy
+
 
 def listed_count_model(listed_count, y):
     # create Model
@@ -334,30 +348,7 @@ def textClassification(X, y, gamma_val, C_val, name):
 
 
 
-#taken from SVM Repl
-def getCAndGamma(model, X, y, name):
-    C_s, gamma_s = np.meshgrid(np.logspace(-2,1, 20), np.logspace(-2, 1, 20))
-    print(name)
-    scores = list()
-    i=0; j=0
-    z = 0
-    for C, gamma in zip(C_s.ravel(),gamma_s.ravel()):
-        print(str(z))
-        z = z + 1
-        model.C = C
-        model.gamma = gamma
-        this_scores = cross_val_score(model, X, y, cv=5)
-        scores.append(np.mean(this_scores))
-    
-    scores=np.array(scores)
-    scores=scores.reshape(C_s.shape)
-    fig2, ax2 = plt.subplots(figsize=(20,20))
-    c=ax2.contourf(C_s,gamma_s,scores)
-    ax2.set_xlabel('C', fontsize=20)
-    ax2.set_ylabel('gamma', fontsize=20)
-    fig2.colorbar(c)
-    graph = 'plots/' + name + '.png'
-    fig2.savefig(graph)
+
 
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
 def combinedFeatures(x1, x2,df):
@@ -421,32 +412,7 @@ def combinedFeatures(x1, x2,df):
         
     
     
-def printBestCGamma(model,Xtrain, ytrain,X_test,y_test, feature_count):
-    #print(model.get_params().keys())
-    if(feature_count=="multiple"):
-        hyperparameters = { 'classifier__C': [.001,.001,.01,.1,1,10],
-                         
-                        
-                        }
-   
-    elif(feature_count=="single"):
-        hyperparameters = { 'nu': [.1,.2,.3,.4,.5,.6,.7,.8,.9,.99]
-                           
-                        
-                        }
-    clf = GridSearchCV(model, hyperparameters, cv=5)
-    clf.fit(Xtrain, ytrain)
-    print(clf.best_params_)
-    
-    clf.refit
-    preds = clf.predict(X_test)
-    
 
-    
-    #print(preds)
-    print( np.mean(preds == y_test))
-    print(classification_report(y_test, preds))
-    return preds
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
 def combinedThreeTextFeatures(x1, x2, x3,df):
     print(x1+" and "+x2+" and "+x3)
