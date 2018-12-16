@@ -23,3 +23,10 @@ accuracy: 0.670846394984326 recall: 0.6360759493670886 precision: 0.679054054054
 scores for hashtag num accuracy: 0.5362295909354733 recall: 0.35359199455282486 precision: 0.5690533847742703
 scores for hashtag num 
 accuracy: 0.6484800015797321 recall: 0.4928458395941059 precision: 0.7168641871884985
+scores for Favourites Countaccuracy: 0.49450500238677575 recall: 0.43545918264016964 precision: 0.2468732059958118
+scores for Favourites Countscores for name and description
+accuracy: 0.7084639498432602 recall: 0.6234177215189873 precision: 0.7462121212121212
+scores for name and description
+accuracy: 0.7084639498432602 recall: 0.6234177215189873 precision: 0.7462121212121212
+scores for name and description
+accuracy: 0.7084639498432602 recall: 0.6234177215189873 precision: 0.7462121212121212

@@ -10,3 +10,11 @@ scores for Screen Name
 accuracy: 0.6742051052395881 recall: 0.425062254427124 precision: 0.8479439100593875
 scores for name and description
 accuracy: 0.6724137931034483 recall: 0.509493670886076 precision: 0.7488372093023256
+scores for name and tweet
+accuracy: 0.6661442006269592 recall: 0.5632911392405063 precision: 0.7035573122529645
+scores for name and screen_name
+accuracy: 0.6677115987460815 recall: 0.41139240506329117 precision: 0.8333333333333334
+scores for name and created_at
+accuracy: 0.6755485893416928 recall: 0.4240506329113924 precision: 0.8427672955974843
+scores for tweet and description
+accuracy: 0.6285266457680251 recall: 0.5664556962025317 precision: 0.6415770609318996
