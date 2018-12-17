@@ -14,3 +14,20 @@ Confidence Intervals for accuracy
 Hyper parameters heatmap
 
 Table of results
+
+
+
+Methodology Sections
+	- Dataset
+		- how we gathered and built our set
+	- Pre-processing
+		- feature selection/generation and transformations
+	- Algorithms
+		- tested algorithms and libraries used
+	- Evaluation
+		- k cross validation and comparisons for hyper parameters
+
+Results Section
+	- algorithms and plots used
+	- OPTIONAl Confidence intervals
+	- Selection of best performing algorithm + feature selection set 
