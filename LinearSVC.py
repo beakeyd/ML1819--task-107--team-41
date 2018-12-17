@@ -71,7 +71,7 @@ class NumberSelector(BaseEstimator, TransformerMixin):
 
 def main():
     
-    with open('data/original_dataset_nounicode.json') as totalDataset,open('data/original_dataset_nounicode.json') as totalDataset1,open("data/numb_Hashtag.json") as numbHashtag,open("data/twitter_Hashtag.json") as hashTagTweet:
+    with open('data/original_dataset_nounicode.json') as totalDataset,open('data/original_dataset_nounicode.json') as totalDataset1,open("data/numb_Hashtag.json") as numbHashtag,open("data/twitter_Hashtag.json") as hashTagTweet, open("data/gender.json") as genderData:
         
         totalDataset = json.load(totalDataset)
         df=pandas.read_json(totalDataset1)
@@ -89,33 +89,32 @@ def main():
 
         #create models, plot and then get accuracy of models
         #created_at_acc = simpleFeature(created_at, gender, "Created At")
-        #favouritesResults = simpleFeature(favourites_count, gender, "Favourites Count")
+        favouritesResults = simpleFeature(favourites_count, gender, "Favourites Count")
         
-        #listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
-        #description_acc = textClassification(description, gender, "Description")
-        #tweet_acc = textClassification(tweet, gender, "Tweet")
-        #name_acc = textClassification(name, gender, "name")
+        listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
+        description_acc = textClassification(description, gender, "Description")
+        tweet_acc = textClassification(tweet, gender, "Tweet")
+        name_acc = textClassification(name, gender, "name")
         screen_name = textClassification(name, gender, "Screen Name")
 
-        #plotAccuracy(created_at_acc, favourites_acc,
-        #            listed_acc, description_acc,
-        #            tweet_acc, name_acc, 'Accuracy')
         
         
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        #nameDescAcc=combinedFeatures("name", "description", df)
-        #nameTweetAcc=combinedFeatures("name", "tweet", df)
-        #nameScreen=combinedFeatures("name", "screen_name", df)
-        #nameCreatedAt=combinedFeatures("name", "created_at", df)
-        #tweetDesc=combinedFeatures("tweet", "description", df)
-        #tweetNameDesc=combinedThreeTextFeatures("tweet", "name", "description", df)
-      
-        #hashtagNumbAcc=hashtagNum(data, data2, "hashtag num ")
-        #hashtagText=hashtagText(data, data2, "hashtag num ")
+        nameDescAcc=combinedFeatures("name", "description", df)
+        nameTweetAcc=combinedFeatures("name", "tweet", df)
+        nameScreen=combinedFeatures("name", "screen_name", df)
+        nameCreatedAt=combinedFeatures("name", "created_at", df)
+        tweetDesc=combinedFeatures("tweet", "description", df)
+        tweetNameDesc=combinedThreeTextFeatures("tweet", "name", "description", df)
+        numbHashtag=json.load(numbHashtag)
+        genderData=json.load(genderData)
+        hashtagTweet=json.load(hashTagTweet)
+        hashtagNumbAcc=hashtagNum(numbHashtag, genderData, "hashtag num ")
+        hashtagTextAcc=hashtagText(hashtagTweet, genderData, "hashtag text ")
         
-        #plotAccuracy(favouritesResults, listed_acc, description_acc, tweet_acc, name_acc, screen_name, nameDescAcc, nameTweetAcc, nameScreen, nameCreatedAt, tweetDesc, tweetNameDesc, favouritesResults, favouritesResults)
+        plotAccuracy(favouritesResults, listed_acc, description_acc, tweet_acc, name_acc, screen_name, nameDescAcc, nameTweetAcc, nameScreen, nameCreatedAt, tweetDesc, tweetNameDesc, hashtagNumbAcc, hashtagTextAcc)
     
 
 def normaliseData(x):
@@ -125,10 +124,23 @@ def normaliseData(x):
 
 def plotAccuracy(favouritesAcc,listed_acc,description_acc,tweet_acc,name_acc,screen_name,nameDescAcc,nameTweetAcc,nameScreen,nameCreatedAt,tweetDesc,tweetNameDesc,boop,doop):
     plt.figure(figsize=(16, 16))
-    
-    y = (favouritesAcc,listed_acc,description_acc,tweet_acc,name_acc,screen_name,nameDescAcc,nameTweetAcc,nameScreen,nameCreatedAt,tweetDesc,tweetNameDesc,boop,doop)
+    plt.subplot(2,1,1)
+  
+    y = (favouritesAcc,listed_acc,description_acc,tweet_acc,name_acc,screen_name,nameDescAcc,nameTweetAcc)
 
-    X_axis = ['favourites', 'listed count', 'description', 'tweet', 'name', 'screen name', 'name+desc', 'name+tweet', 'name+screen', 'name+createdat', 'tweet+desc', 'tweet+name+desc', 'number hashtags', 'hashtag text']
+    X_axis = ['favourites', 'listed count', 'description', 'tweet', 'name', 'screen name', 'name+desc', 'name+tweet']
+
+    y_pos = np.arange(len(X_axis))
+
+    plt.bar(y_pos, y, align='center', alpha=0.5)
+    plt.xticks(y_pos, X_axis)
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy of features')
+
+    plt.subplot(2,1,2)
+    y = (nameScreen,nameCreatedAt,tweetDesc,tweetNameDesc,boop,doop)
+
+    X_axis = ['name+screen', 'name+createdat', 'tweet+desc', 'tweet+name+desc', 'number hashtags', 'hashtag text']
 
     y_pos = np.arange(len(X_axis))
 
@@ -149,6 +161,7 @@ def plotHeatMap(graphName, clf, clist, interlist):
     graph = 'plots/' + graphName+'HyperParam.png'
     plt.savefig(graph)
     plt.close()
+    
 #https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html#sphx-glr-auto-examples-model-selection-plot-precision-recall-py
 def plotPrecisionRecall(predictions, y, graphName):
     precision, recall, _ = precision_recall_curve(predictions, y)
@@ -170,6 +183,7 @@ def plotPrecisionRecall(predictions, y, graphName):
     plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
           average_precision))
     plt.close()
+
 def plotSingleFeatureData(X, actY, predY, graph_name, xLabel, clf, clist, interlist):
     print(len(actY))
     fig, ax = plt.subplots(figsize=(6,2))
@@ -209,20 +223,21 @@ def created_at_model(created_at, y):
 def hashtagNum( data, data2,name):
     X, y=[],[]
     for values in data:
-        
+       
         if values in data2:
             if(data2[values]=="M"):
                 y.append(1)
             else:
                 y.append(0)
             X.append(data[values])
-          
+       
     X=np.array(X)
+    
     y=np.array(y)
   
-    simpleFeature(X, y, name)
-    print("Model is " + name)
-    return 0
+    accuracy=simpleFeature(X, y, name)
+   
+    return accuracy
 def hashtagText( data, data2,name):
     X, y=[],[]
     for values in data:
