@@ -14,18 +14,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from mpl_toolkits.mplot3d import Axes3D
-import time
-
+import time, mglearn
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.datasets import make_classification
 from datetime import datetime as dt
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import  LinearSVC
 from sklearn.model_selection import KFold
 from sklearn import model_selection, preprocessing, linear_model, naive_bayes, metrics, svm
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics import classification_report, accuracy_score, recall_score, precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RepeatedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 import pandas, numpy, textblob, string
@@ -37,6 +38,9 @@ from nltk.corpus import stopwords
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import RandomForestClassifier
 from matplotlib import pyplot as plt
+from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import average_precision_score
+from sklearn.utils.fixes import signature
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
 class TextSelector(BaseEstimator, TransformerMixin):
     """
@@ -68,142 +72,115 @@ class NumberSelector(BaseEstimator, TransformerMixin):
 
 def main():
     
-    with open('data/original_dataset_nounicode.json') as data:
+    with open('data/original_pruned_With_hashtagNum.json') as totalDataset,open('data/original_pruned_With_hashtagNum.json') as totalDataset1 :
        
-        data = json.load(data)
-
-        # slice data
-        #created_at = np.array([d["created_at"] for d in data])
-        favourites_count = np.array([d["favourites_count"]for d in data])
-        listed_count = np.array([d["listed_count"] for d in data])
-        description = np.array([d["description"] for d in data])
-        tweet = np.array([d["tweet"] for d in data])
-        name = np.array([d["name"] for d in data])
-        screen_name = np.array([d["screen_name"] for d in data])
-        gender = np.array([d["gender"] for d in data])
-      
+        totalDataset=json.load(totalDataset)
        
-
-        #create models, plot and then get accuracy of models
-        #created_at_acc = simpleFeature(created_at, gender, "Created At")
-        favourites_acc = simpleFeature(favourites_count, gender, "Favourites Count")
         
-        listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
-        
-
-        #plotAccuracy(created_at_acc, favourites_acc,
-        #            listed_acc, description_acc,
-        #            tweet_acc, name_acc, 'Accuracy')
-    
-    with open('data/original_dataset_nounicode.json') as data:
-        
-        df=pandas.read_json(data)
+        df=pandas.read_json(totalDataset1)
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
+       
+       
+        # slice data
+       
+        favourites_count = np.array([d["favourites_count"]for d in totalDataset])
+        listed_count = np.array([d["listed_count"] for d in totalDataset])
+        hashtagNum= np.array([d["hashtagNumb"] for d in totalDataset])
+        gender = np.array([d["gender"] for d in totalDataset])
+      
+       
+        
+        #create models, plot and then get accuracy of models
+       
+        favouritesResults = simpleFeature(favourites_count, gender, "Favourites Count KNeighbour")
+        
+        listed_acc = simpleFeature(listed_count, gender, "Listed Count KNeighbour")
+       
+        numberAcc=simpleFeature(hashtagNum, gender, "Hashtag Count KNeighbour" )
+        favouritesListedAcc=combinedFeatures("favourites_count", "listed_count","Favourite and Listed Accuracy KNeighbour", df)
+        favouritesNumberAcc=combinedFeatures(favourites_count, hashtagNumb,"Favourite and Hashtag Accuracy Kneighbour",df)
+        listedNumberAcc=combinedFeatures("listed_count", "hashtagNumb","Listed Count and Hashtag Accuracy Kneighbour",df)
+        
+        allThreeAcc=combinedThreeFeatures("hashtagNumb", "listed_count", "favourites_count","Favourite Listed and Hashtag Numb KNeighbour",df)
+       
         
         
-        combinedFeatures("favourites_count", "listed_count", df)
-        
-    with open("data/numb_Hashtag.json") as data, open("data/gender.json") as data2:
-        data = json.load(data)
-        data2 =json.load(data2)
-        accuracy=hashtagNum(data, data2, "hashtag num ")
-  
-
+       
+    
+       
+        plotAccuracy(favouritesResults, listed_acc, numberAcc,  favouritesListedAcc, favouritesNumberAcc, listedNumberAcc,allThreeAcc)
+    
 
 def normaliseData(x):
    
     scale=x.max(axis=0)
     return (x/scale, scale)
 
-def plotAccuracy(created_at_acc, favourites_acc,
-                 listed_acc, description_acc,
-                 tweet_acc, name_acc, graph_name):
+def plotAccuracy(favouritesAcc,listed_acc,numberAcc,favouritesListedAcc,favouritesNumberAcc,listedNumberAcc,allThreeAcc):
+    plt.figure(figsize=(16, 16))
     
-    y = (created_at_acc, favourites_acc,
-          listed_acc, description_acc,
-         tweet_acc, name_acc)
+  
+    y = (favouritesAcc,listed_acc,numberAcc,favouritesListedAcc,favouritesNumberAcc,listedNumberAcc,allThreeAcc)
 
-    X_axis = ['created_at', 'favourites',
-               'listed', 'description',
-              'tweet', 'name']
+    X_axis = ['favouritesAcc', 'listed_acc', 'numberAcc', 'favouritesListedAcc', 'favouritesNumberAcc', 'listedNumberAcc ', 'allThreeAcc']
 
     y_pos = np.arange(len(X_axis))
 
     plt.bar(y_pos, y, align='center', alpha=0.5)
     plt.xticks(y_pos, X_axis)
-    plt.ylabel('Accuracy')
+    plt.ylabel('Accuracy Kneighbours')
     plt.title('Accuracy of features')
-    graph = 'plots/' + graph_name + '.png'
+
+   
+    graph = 'plots/Accuracy Kneighbours.png'
+    plt.savefig(graph)
+    plt.close()
     #plt.show()
 
-
-def plotSingleFeatureData(X, actY, predY, graph_name, xLabel):
-    print(len(actY))
-    fig, ax = plt.subplots(figsize=(6,2))
-    ax.scatter(X, actY, label='Data', marker='+')
-    ax.scatter(X, predY, label='Prediction', marker='x')
-
-    ax.set_xlabel('test', fontsize=12)
-    ax.set_ylabel('Gender')
-    ax.set_title(graph_name)
-    print("boo")
-    graph = 'plots/' + graph_name + '1.png'
-    fig.savefig(graph)
-
-
-def created_at_model(created_at, y):
-    # create Model
-    (X, Xscale) = normaliseData(np.array(created_at).reshape(-1,1))
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=42)
-    clf = LinearSVC(random_state=0, tol=1e-5)
-    clf.fit(Xtrain, ytrain)
-   # getCAndGamma(clf, Xtrain, ytrain, 'created_at_model')
-    # make predicitions
-    predY = clf.predict(Xtest.reshape(-1, 1))
-    #plot data, get and return accuracy of model
-    print('created_at Model metrics: ')
-    print(classification_report(ytest, predY))
-    plotSingleFeatureData(Xtest, ytest, predY, 'Created_At', 'Posix Time Account Created At - Scaled between 0-1')
-    accuracy = accuracy_score(ytest, predY)
-    print(str(accuracy))
-   # predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
-    accuracy = accuracy_score(ytest, predY)
+def plotHeatMap(graphName, clf, clist, interlist):
+    plt.figure(figsize=(8, 8))
+    scores=clf.cv_results_['mean_test_score'].reshape(-1, 4).T
+    heatmap=mglearn.tools.heatmap(scores, xlabel="C", ylabel="boop", cmap="viridis", fmt="%.3f", xticklabels=clist, yticklabels=interlist)
+    plt.colorbar(heatmap)
+    graph = 'plots/' + graphName+'HyperParam.png'
+    plt.savefig(graph)
+    plt.close()
     
-    return accuracy
+#https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html#sphx-glr-auto-examples-model-selection-plot-precision-recall-py
+def plotPrecisionRecall(predictions, y, graphName):
+    precision, recall, _ = precision_recall_curve(predictions, y)
+    average_precision = average_precision_score(predictions, y)
+    # In matplotlib < 1.5, plt.fill_between does not have a 'step' argument
+    step_kwargs = ({'step': 'post'}
+                if 'step' in signature(plt.fill_between).parameters
+                else {})
+    plt.step(recall, precision, color='b', alpha=0.2,
+            where='post')
+    plt.fill_between(recall, precision, alpha=0.2, color='b', **step_kwargs)
 
-#nested vs non nested sklearn tutorial    
-def hashtagNum( data, data2,name):
-    X, y=[],[]
-    for values in data:
-        
-        if values in data2:
-            if(data2[values]=="M"):
-                y.append(1)
-            else:
-                y.append(0)
-            X.append(data[values])
-          
-    X=np.array(X)
-    y=np.array(y)
-    print(X)
-    print(y)
-    simpleFeature(X, y, name)
-    print("Model is " + name)
-    return 0
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    graph = 'plots/' + graphName+'PrecisionRecall.png'
+    plt.savefig(graph)
+    plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
+          average_precision))
+    plt.close()
+
+
 
 #nested vs non nested sklearn tutorial    
 def simpleFeature(X, y, name):
     print("Model is " + name)
-    if(name=="hashtag num "):
+    if(name=="Hashtag Numb KNeighbour"):
         X  = X.reshape(-1,1)
     else:
         (X, _) = normaliseData(X.reshape(-1,1))
-    innerCV=KFold(n_splits=5, shuffle=True, random_state=42)
-    outerCV=KFold(n_splits=10, shuffle=True, random_state=21)
-
-    model = KNeighborsClassifier()
+   
+    outerCV=KFold(n_splits=4, shuffle=True, random_state=21)
     hyperparameters={
         "n_neighbors": [ 1,5,10]
         ,
@@ -216,21 +193,31 @@ def simpleFeature(X, y, name):
 
 
         }
-    clf= GridSearchCV(estimator=model, param_grid=hyperparameters, cv=innerCV )
-    accuracy=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,n_jobs=-1)
+    neighbour=hyperparameters["n_neighbors"]
+    leaflist=hyperparameters["leaf_size"]
+    model = KNeighborsClassifier()
+    cv = RepeatedKFold(n_splits=2, n_repeats=2)
+    clf=GridSearchCV(estimator=model, param_grid=hyperparameters, cv=cv)
+    clf.fit(X, y)
+  
    
-    recall=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,n_jobs=-1,scoring='recall')
-    precision=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,n_jobs=-1,scoring='precision')
+    accuracy=cross_val_score(clf, X.reshape(-1,1), y, cv=cv).mean()
+    recall=clf.score
+    print(recall)
+    recall=cross_val_score(clf, X.reshape(-1,1), y, cv=cv,scoring='recall').mean()
+    precision=cross_val_score(clf, X.reshape(-1,1), y, cv=cv,scoring='precision').mean()
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
-    
-    plotSingleFeatureData(X, y, predictions, name, name+'- Scaled between 0-1')
-    f=open("KNeighbours scores.txt", "a+")
+   
+    plotHeatMap(name, clf, neighbour, leaflist)
+    plotPrecisionRecall(predictions, y, name)
+  
+    f=open("scores.txt", "a+")
     f.write("scores for "+name)
-    f.write("accuracy: "+str(np.mean(accuracy))+" recall: "+str(np.mean(recall))+" precision: "+str(np.mean(precision))+"\n")
+    #f.write("accuracy: "+str(np.mean(accuracy))+" recall: "+str(np.mean(recall))+" precision: "+str(np.mean(precision))+"\n")
     f.close()
 
   
-    print(classification_report(y, predictions))
+    #print(classification_report(y, predictions))
     return accuracy
 
 
@@ -240,16 +227,18 @@ def simpleFeature(X, y, name):
 
 
 #The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
-def combinedFeatures(x1, x2,df):
+def combinedFeatures(x1, x2, graphName,df):
+    outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
+   
     
-    name=x1+" and "+x2
-    graphName=(str(x1+" and "+x2))    
     features= [c for c in df.columns.values if c   in [x1,x2]]
     target='gender'
     
 
-    X_train, X_test, y_train, y_test = train_test_split(df[features], df[target], test_size=0.1, random_state=42)
-    X_train.head()
+    X, y = df[features], df[target]
+
+    X.head()
+    
     if(isinstance(df.iloc[0][x1], str)):
         feat1 = Pipeline([
                 ('selector', TextSelector(key=x1)),
@@ -277,118 +266,125 @@ def combinedFeatures(x1, x2,df):
             ])
 
 
-    feat1.fit_transform(X_train)
-    feat2.fit_transform(X_train)
+    feat1.fit_transform(X)
+    feat2.fit_transform(X)
     feats = FeatureUnion([('feat1', feat1), 
                     
                     ('feat2', feat2)])
     feature_processing = Pipeline([('feats', feats)])
-    feature_processing.fit_transform(X_train)
+    feature_processing.fit_transform(X)
     pipeline = Pipeline([
         ('features',feats),
-        ('classifier', KNeighborsClassifier()),
+        ('classifier', KNeighborsClassifier()
+        ),
     ])
     hyperparameters={
-        "classifier__n_neighbors": [ 1,5,10]
+        "classifier__n_neighbors": [ 1,5,10, 20]
         ,
         
-        "classifier__leaf_size": [10, 20, 30, 50],
+        "classifier__leaf_size": [10, 20, 30, 50]#,
        
-        "classifier__p": [1,2]
-      
-      
+       # "classifier__p": [1,2]
 
 
-    }
-    clf = GridSearchCV(pipeline, hyperparameters, cv=5)
+        }
+    neighbours=hyperparameters["classifier__n_neighbors"]
+    leafList=hyperparameters["classifier__leaf_size"]
+    cv = RepeatedKFold(n_splits=2, n_repeats=2)
+    clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
+    clf.fit(X, y)
     
-    #Fit and tune model
-    clf.fit(X_train, y_train)
-  
-    predY=clf.predict(X_test)
+    accuracy = cross_val_score(clf, X=X, y=y, cv=cv ).mean()
+    print(accuracy)
+    recall = cross_val_score(clf, X=X, y=y, cv=cv, scoring="recall").mean()
+    print(recall)
+    precision =cross_val_score(clf, X=X, y=y, cv=cv, scoring="precision").mean()
+    print(precision)
+    predictions = cross_val_predict(clf, X, y, cv=outerCV)
+   
+    plotHeatMap(graphName, clf, neighbours, leafList)
+    plotPrecisionRecall(predictions, y, graphName)
     
-    accuracy=accuracy_score(y_test, predY)
-    recall=recall_score(y_test, predY)
-    precision=precision_score(y_test, predY)
-    f=open("KNeighbours scores.txt", "a+")
-    f.write("scores for "+name+"\n")
-    f.write("accuracy: "+str(accuracy)+" recall: "+str(recall)+" precision: "+str(precision))
-    f.write("\n")
-    f.close()
+    return accuracy
+
+
     
     
         
 
 
-#The multiple feature text classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
-def combinedThreeTextFeatures(x1, x2, x3,df):
+#The multiple feature  classification code is based off https://www.kaggle.com/baghern/a-deep-dive-into-sklearn-pipelines#
+def combinedThreeFeatures(x1, x2, x3,graphName, df):
     print(x1+" and "+x2+" and "+x3)
-    graphName=(str(x1+" and "+x2))
-    
-    features= [c for c in df.columns.values if c   in [x1,x2]]
+   
+    outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
+    features= [c for c in df.columns.values if c   in [x1,x2, x3]]
     
     target='gender'
     
 
-    X_train, X_test, y_train, y_test = train_test_split(df[features], df[target], test_size=0.1, random_state=42)
-    X_train.head()
-    tweet = Pipeline([
-            ('selector', TextSelector(key=x1)),
-            
-            ('words', CountVectorizer(analyzer='word'))
-        ])
-    name= Pipeline([
-            ('selector', TextSelector(key=x2)),
-            
-            ('words', CountVectorizer(analyzer='word'))
-        ])
-    description= Pipeline([
-            ('selector', TextSelector(key=x2)),
-            
-            ('words', CountVectorizer(analyzer='word'))
-        ])
-
-    tweet.fit_transform(X_train)
-    name.fit_transform(X_train)
-    description.fit_transform(X_train)
-    feats = FeatureUnion([('tweet', tweet), 
+    X, y = df[features], df[target]
+    X.head()
+    feat1= Pipeline([
+                ('selector', NumberSelector(key=x1)),
+                
+                ('words', StandardScaler())
+            ])
+    feat2= Pipeline([
+                ('selector', NumberSelector(key=x2)),
+                
+                ('words', StandardScaler())
+            ])
+    feat3= Pipeline([
+                ('selector', NumberSelector(key=x3)),
+                
+                ('words', StandardScaler())
+            ])
+    
+    feat1.fit_transform(X)
+    feat2.fit_transform(X)
+    feat3.fit_transform(X)
+   
+    feats = FeatureUnion([('tweet', feat1), 
                     
-                    ('name', name),
-                    ('description', description)])
+                    ('name', feat2),
+                    ('description', feat3)])
 
     feature_processing = Pipeline([('feats', feats)])
-    feature_processing.fit_transform(X_train)
+    feature_processing.fit_transform(X)
     pipeline = Pipeline([
         ('features',feats),
-        ('classifier', KNeighborsClassifier()),
+        ('classifier', LinearSVC(random_state=0, tol=1e-5)),
     ])
     hyperparameters={
-        "classifier__n_neighbors": [ 1,5,10]
+        "classifier__C": [ .1, 1]
         ,
         
-        "classifier__leaf_size": [10, 20, 30, 50],
+        "classifier__intercept_scaling": [.1, 1],
        
-        "classifier__p": [1,2]
+       # "classifier__max_iter": [100, 1000, 10000],
       
-      
+        #"classifier__tol": [1e-4, 1e-5, 1e-6]
 
 
-    }
-    clf = GridSearchCV(pipeline, hyperparameters, cv=5)
+        }
+    clist=hyperparameters["classifier__C"]
+    interlist=hyperparameters["classifier__intercept_scaling"]
+    cv = RepeatedKFold(n_splits=2, n_repeats=2)
+    clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
+    clf.fit(X, y)
     
-    #Fit and tune model
-    clf.fit(X_train, y_train)
-  
-    predY=clf.predict(X_test)
-    
-    accuracy=accuracy_score(y_test, predY)
-    recall=recall_score(y_test, predY)
-    precision=precision_score(y_test, predY)
-    f=open("KNeighbours scores.txt", "a+")
-    f.write("scores for "+graphName+"\n")
-    f.write("accuracy: "+str(accuracy)+" recall: "+str(recall)+" precision: "+str(precision))
-    f.write("\n")
-    f.close()
+    accuracy = cross_val_score(clf, X=X, y=y, cv=cv ).mean()
+    print(accuracy)
+    recall = cross_val_score(clf, X=X, y=y, cv=cv, scoring="recall").mean()
+    print(recall)
+    precision =cross_val_score(clf, X=X, y=y, cv=cv, scoring="precision").mean()
+    print(precision)
+    predictions = cross_val_predict(clf, X, y, cv=outerCV)
+   
+    plotHeatMap(graphName, clf, clist, interlist)
+    plotPrecisionRecall(predictions, y, graphName)
+    return accuracy
     
     #printBestCGamma(pipeline, X_train, y_train, X_test, y_test, "multiple")
 if __name__ == '__main__':

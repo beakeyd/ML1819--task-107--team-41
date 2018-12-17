@@ -62,6 +62,26 @@ def removeUnicodeAndLangId(data):
     with open('data/twitter_tweets_no_unicode.json', 'w') as output1:
                 json.dump(copy, output1)
 
+def addHashtagNumTotalDataset(data, data2):
+    
+    copy=[]
+    for key in data:      
+        
+        #print(key["id"])
+        for key2 in data2:
+           
+            if (str(key2)==str(key["id"])):
+               
+                key["hashtagNumb"]=data2[key2]
+            
+                copy.append(key)
+               
+    with open('data/original_pruned_With_hashtagNum.json', 'w+') as output1:
+        json.dump(copy, output1)
+
+        
+        
+      
 #this function strips the main dataset 
 def stripRest(data):
     identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
@@ -97,12 +117,15 @@ def main():
    
     
     
-    with open('data/twitter_tweets_pruned.json') as data:
-        data=json.load(data)
-        removeUnicodeAndLangId(data)
+    #with open('data/twitter_tweets_pruned.json') as data:
+    #    data=json.load(data)
+    #    removeUnicodeAndLangId(data)
     #with open('data/original_dataset.json') as data:
     #    data=json.load(data)
     #    stripRest(data)
-
+    with open("data/original_dataset_nounicode.json") as data, open("data/numb_Hashtag.json") as data2:
+        data=json.load(data)
+        data2=json.load(data2)
+        addHashtagNumTotalDataset(data, data2)
 if __name__ == '__main__':
     main()

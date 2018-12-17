@@ -174,7 +174,7 @@ def textClassification(X, y, name):
                     ('tfidf', TfidfTransformer()),
                     ('clf', MultinomialNB()),
    ])
-    print(pipeline.get_params().keys())
+    
     cv = RepeatedKFold(n_splits=2, n_repeats=2)
     clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
@@ -198,7 +198,10 @@ def main():
             gender_data = json.load(gender_data)
             gender_arr = []
             tweet_arr = []
+        
             for key, value in data.items():
+                print(key)
+                
                 for val in value:
                     tweet_arr.append(val)
                     if gender_data[key] == 'M':
@@ -206,6 +209,7 @@ def main():
                         gender_arr.append(1)
                     else:
                         gender_arr.append(0)
+                
             gender_arr=np.array(gender_arr)
             tweet_arr=np.array(tweet_arr)
             male, fem=0, 0
@@ -214,7 +218,9 @@ def main():
                     male+=1
                 else:
                     fem+=1
-            tweet_acc = textClassification(tweet_arr, gender_arr, "Tweet")
+            print(gender_arr)
+            print(tweet_arr)
+            #tweet_acc = textClassification(tweet_arr, gender_arr, "Tweet")
     
 
 if __name__ == '__main__':
