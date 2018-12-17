@@ -1,0 +1,7 @@
+REPORT Todo's
+	- Graphs
+	
+	- Confidence Interval Calculations
+	- Cross Validation
+	
+	- Mention libraries used
