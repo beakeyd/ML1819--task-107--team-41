@@ -5,3 +5,12 @@ REPORT Todo's
 	- Cross Validation
 	
 	- Mention libraries used
+
+
+F score + accuracy charts for each feature + combination of each feature
+
+Confidence Intervals for accuracy
+
+Hyper parameters heatmap
+
+Table of results
