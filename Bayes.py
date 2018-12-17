@@ -154,18 +154,13 @@ def textClassification(X, y, name):
     # create a dataframe using texts and lables
     print("Model "+name)
     
-  
     outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
     
-   
     hyperparameters={
     "clf__alpha": [ .1, 1],
     'tfidf__norm': ('l1', 'l2')#, 
     #'tfidf__use_idf': (True, False),  
     #'tfidf__sublinear_tf': (True, False)
-    
-  
-
 
     }
     alpha=hyperparameters["clf__alpha"]
@@ -178,7 +173,6 @@ def textClassification(X, y, name):
     cv = RepeatedKFold(n_splits=2, n_repeats=2)
     clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
-    
     accuracy = cross_val_score(clf, X=X, y=y, cv=cv ).mean()
     print(accuracy)
     recall = cross_val_score(clf, X=X, y=y, cv=cv, scoring="recall").mean()
@@ -192,6 +186,7 @@ def textClassification(X, y, name):
     return accuracy
 
 def main():
+    '''
     with open('data/twitter_tweets_no_unicode.json') as data:
         with open('data/gender.json') as gender_data:
             data = json.load(data)
@@ -215,7 +210,38 @@ def main():
                 else:
                     fem+=1
             tweet_acc = textClassification(tweet_arr, gender_arr, "Tweet")
-    
+    i = 0
+    '''
+    with open('data/original_dataset_nounicode.json') as data:
+        with open('data/gender.json') as gender_data:
+            data = json.load(data)
+            gender_data = json.load(gender_data)
+            gender_arr = []
+            screen_name_arr = []
+            name_arr = []
+            description_arr = []
+            for elm in data:
+                screen_name_arr.append(elm["screen_name"])
+                name_arr.append(elm["name"])
+                description_arr.append(elm["description"])
+                _id = elm["id"]
+                if gender_data[str(_id)] == 'M':
+                    gender_arr.append(1)
+                else:
+                    gender_arr.append(0)
+            gender_arr=np.array(gender_arr)
+            name_arr=np.array(name_arr)
+            screen_name_arr=np.array(screen_name_arr)
+            description_arr=np.array(description_arr)
+            male, fem=0, 0
+            for d in gender_arr:
+                if d==1:
+                    male+=1
+                else:
+                    fem+=1
+            t = textClassification(screen_name_arr, gender_arr, "screen_name")
+            t = textClassification(name_arr, gender_arr, "name")
+            t = textClassification(description_arr, gender_arr, "description")
 
 if __name__ == '__main__':
    main()
