@@ -14,8 +14,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from mpl_toolkits.mplot3d import Axes3D
-import time
-
+import time, mglearn
+from sklearn.datasets import make_classification
 from datetime import datetime as dt
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.svm import  LinearSVC
@@ -25,7 +25,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics import classification_report, accuracy_score, recall_score, precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RepeatedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 import pandas, numpy, textblob, string
@@ -86,7 +86,7 @@ def main():
 
         #create models, plot and then get accuracy of models
         #created_at_acc = simpleFeature(created_at, gender, "Created At")
-        #favourites_acc = simpleFeature(favourites_count, gender, "Favourites Count")
+        favouritesResults = simpleFeature(favourites_count, gender, "Favourites Count")
         
         #listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
         #description_acc = textClassification(description, gender, "Description")
@@ -104,7 +104,7 @@ def main():
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        combinedFeatures("name", "description", df)
+        #combinedFeatures("name", "description", df)
         #combinedFeatures("name", "tweet", df)
         #combinedFeatures("name", "screen_name", df)
         #combinedFeatures("name", "created_at", df)
@@ -146,8 +146,15 @@ def plotAccuracy(created_at_acc, favourites_acc,
     graph = 'plots/' + graph_name + '.png'
     #plt.show()
 
+def plotHeatMap(graphName, clf, clist, interlist):
+    plt.figure(figsize=(8, 8))
+    scores=clf.cv_results_['mean_test_score'].reshape(-1, 2).T
+    heatmap=mglearn.tools.heatmap(scores, xlabel="C", ylabel="boop", cmap="viridis", fmt="%.3f", xticklabels=clist, yticklabels=interlist)
+    plt.colorbar(heatmap)
+    graph = 'plots/' + graphName+'HyperParam.png'
+    plt.savefig(graph)
 
-def plotSingleFeatureData(X, actY, predY, graph_name, xLabel):
+def plotSingleFeatureData(X, actY, predY, graph_name, xLabel, clf, clist, interlist):
     print(len(actY))
     fig, ax = plt.subplots(figsize=(6,2))
     ax.scatter(X, actY, label='Data', marker='+')
@@ -159,6 +166,7 @@ def plotSingleFeatureData(X, actY, predY, graph_name, xLabel):
     print("boo")
     graph = 'plots/' + graph_name + '1.png'
     fig.savefig(graph)
+   
 
 #this function is no longer used
 def created_at_model(created_at, y):
@@ -173,7 +181,7 @@ def created_at_model(created_at, y):
     #plot data, get and return accuracy of model
     print('created_at Model metrics: ')
     print(classification_report(ytest, predY))
-    plotSingleFeatureData(Xtest, ytest, predY, 'Created_At', 'Posix Time Account Created At - Scaled between 0-1')
+    plotSingleFeatureData(Xtest, ytest, predY, 'Created_At', 'Posix Time Account Created At - Scaled between 0-1', clist, interlist)
     accuracy = accuracy_score(ytest, predY)
     print(str(accuracy))
    # predY=printBestCGamma(clf, Xtrain, ytrain, Xtest, ytest, "single")
@@ -228,37 +236,43 @@ def simpleFeature(X, y, name):
         X  = X.reshape(-1,1)
     else:
         (X, _) = normaliseData(X.reshape(-1,1))
-    innerCV=KFold(n_splits=5, shuffle=True, random_state=42)
-    outerCV=KFold(n_splits=10, shuffle=True, random_state=21)
-
-    model = LinearSVC(random_state=42)
+    innerCV=KFold(n_splits=2, shuffle=True, random_state=42)
+    outerCV=KFold(n_splits=4, shuffle=True, random_state=21)
     hyperparameters={
-        "C": [ .1, 1, 10],
+            "C": [ .1, .5],
+            
+            
+            "intercept_scaling": [.1, .5]#,
         
         
-        "intercept_scaling": [.1, .5, 1,5,  10],
-      
-      
-        "tol": [1e-4, 1e-5, 1e-6]
+            #"tol": [1e-4, 1e-5, 1e-6]
 
 
-        }
-    clf= GridSearchCV(estimator=model, param_grid=hyperparameters, cv=innerCV )
+            }
+    clist=hyperparameters["C"]
+    interlist=hyperparameters["intercept_scaling"]
+    model = LinearSVC(random_state=42)
+    cv=RepeatedKFold(n_splits=2, n_repeats=4)
+    clf=GridSearchCV(estimator=model, param_grid=hyperparameters, cv=cv)
+    clf.fit(X, y)
+    
+    
+   
     accuracy=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV).mean()
    
     recall=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,scoring='recall').mean()
     precision=cross_val_score(clf, X.reshape(-1,1), y, cv=outerCV,scoring='precision').mean()
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
-    
-    plotSingleFeatureData(X, y, predictions, name, name+'- Scaled between 0-1')
+    #plotSingleFeatureData(X, y, predictions, name, name+'- Scaled between 0-1', clf,clist, interlist)
+    plotHeatMap(name, clf, clist, interlist)
     f=open("scores.txt", "a+")
     f.write("scores for "+name)
-    f.write("accuracy: "+str(np.mean(accuracy))+" recall: "+str(np.mean(recall))+" precision: "+str(np.mean(precision))+"\n")
+    #f.write("accuracy: "+str(np.mean(accuracy))+" recall: "+str(np.mean(recall))+" precision: "+str(np.mean(precision))+"\n")
     f.close()
 
   
-    print(classification_report(y, predictions))
-    return accuracy
+    #print(classification_report(y, predictions))
+    return [recall, precision, accuracy]
 
 
 def textClassification(X, y, name):
