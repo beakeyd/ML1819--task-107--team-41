@@ -100,7 +100,7 @@ def main():
        
         numberAcc=simpleFeature(hashtagNum, gender, "Hashtag Count KNeighbour" )
         favouritesListedAcc=combinedFeatures("favourites_count", "listed_count","Favourite and Listed Accuracy KNeighbour", df)
-        favouritesNumberAcc=combinedFeatures(favourites_count, hashtagNumb,"Favourite and Hashtag Accuracy Kneighbour",df)
+        favouritesNumberAcc=combinedFeatures(favourites_count, "hashtagNumb","Favourite and Hashtag Accuracy Kneighbour",df)
         listedNumberAcc=combinedFeatures("listed_count", "hashtagNumb","Listed Count and Hashtag Accuracy Kneighbour",df)
         
         allThreeAcc=combinedThreeFeatures("hashtagNumb", "listed_count", "favourites_count","Favourite Listed and Hashtag Numb KNeighbour",df)
