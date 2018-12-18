@@ -1,0 +1,4 @@
+scores for screen_name_Bayesaccuracy: 0.49325172630257375 recall: 0.5 precision: 0.24678279974890144
+scores for screen_name_Bayes accuracy: 0.49489956057752665 recall: 0.5 precision: 0.24697897049591966
+scores for name_Bayes accuracy: 0.6362994350282485 recall: 0.6646966830012283 precision: 0.696307007514348
+scores for description_bayes accuracy: 0.6004786566227244 recall: 0.5789786038190385 precision: 0.6145925268722108

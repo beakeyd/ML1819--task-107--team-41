@@ -141,7 +141,7 @@ def plotAccuracy(favouritesAcc,listed_acc,numberAcc,favouritesListedAcc,favourit
 
 def plotHeatMap(graphName, clf, clist, interlist):
     plt.figure(figsize=(8, 8))
-    scores=clf.cv_results_['mean_test_score'].reshape(-1, 4).T
+    scores=clf.cv_results_['mean_test_score'].reshape(-1, 5).T
     heatmap=mglearn.tools.heatmap(scores, xlabel="C", ylabel="boop", cmap="viridis", fmt="%.3f", xticklabels=clist, yticklabels=interlist)
     plt.colorbar(heatmap)
     graph = 'plots/' + graphName+'HyperParam.png'
@@ -208,12 +208,12 @@ def simpleFeature(X, y, name):
     precision=cross_val_score(clf, X.reshape(-1,1), y, cv=cv,scoring='precision').mean()
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
    
-    plotHeatMap(name, clf, neighbour, leaflist)
+    #plotHeatMap(name, clf, neighbour, leaflist)
     plotPrecisionRecall(predictions, y, name)
   
-    f=open("scores.txt", "a+")
+    f=open("scoresKNeighbour.txt", "a+")
     f.write("scores for "+name)
-    #f.write("accuracy: "+str(np.mean(accuracy))+" recall: "+str(np.mean(recall))+" precision: "+str(np.mean(precision))+"\n")
+    f.write("accuracy: "+str(accuracy)+" recall: "+str(recall)+" precision: "+str(precision)+"\n")
     f.close()
 
   
@@ -279,12 +279,12 @@ def combinedFeatures(x1, x2, graphName,df):
         ),
     ])
     hyperparameters={
-        "classifier__n_neighbors": [ 1,5,10, 20]
+        "classifier__n_neighbors": [ 1,5,10, 20, 30]
         ,
         
-        "classifier__leaf_size": [10, 20, 30, 50]#,
+        "classifier__leaf_size": [10, 20, 30, 50, 70],
        
-       # "classifier__p": [1,2]
+       "classifier__p": [1,2]
 
 
         }
@@ -301,8 +301,11 @@ def combinedFeatures(x1, x2, graphName,df):
     precision =cross_val_score(clf, X=X, y=y, cv=cv, scoring="precision").mean()
     print(precision)
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
-   
-    plotHeatMap(graphName, clf, neighbours, leafList)
+    f=open("scoresKNeighbour.txt", "a+")
+    f.write("scores for "+graphName)
+    f.write("accuracy: "+str(accuracy)+" recall: "+str(recall)+" precision: "+str(precision)+"\n")
+    f.close()
+    #plotHeatMap(graphName, clf, neighbours, leafList)
     plotPrecisionRecall(predictions, y, graphName)
     
     return accuracy
@@ -381,8 +384,11 @@ def combinedThreeFeatures(x1, x2, x3,graphName, df):
     precision =cross_val_score(clf, X=X, y=y, cv=cv, scoring="precision").mean()
     print(precision)
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
-   
-    plotHeatMap(graphName, clf, clist, interlist)
+    f=open("scoresKNeighbour.txt", "a+")
+    f.write("scores for "+graphName)
+    f.write("accuracy: "+str(accuracy)+" recall: "+str(recall)+" precision: "+str(precision)+"\n")
+    f.close()
+    #plotHeatMap(graphName, clf, clist, interlist)
     plotPrecisionRecall(predictions, y, graphName)
     return accuracy
     

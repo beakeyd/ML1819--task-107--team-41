@@ -1,0 +1,14 @@
+scores for Favourites Count KNeighbouraccuracy: 0.5062758182395933 recall: 0.43919337411350795 precision: 0.501452064794791
+scores for Listed Count KNeighbouraccuracy: 0.49944391483952977 recall: 0.6027334765614303 precision: 0.5252175920310381
+scores for Hashtag Count KNeighbouraccuracy: 0.5217667619955513 recall: 0.5205849491410485 precision: 0.5280674808993796
+scores for Favourite and Listed Accuracy KNeighbouraccuracy: 0.5451223387353035 recall: 0.4756980438121168 precision: 0.5605959211652907
+scores for Favourite and Hashtag Accuracy Kneighbouraccuracy: 0.5555290753098189 recall: 0.5122024391147497 precision: 0.5535763100878963
+scores for Listed Count and Hashtag Accuracy Kneighbouraccuracy: 0.5641881156657134 recall: 0.5455636102200982 precision: 0.5754120502325755
+scores for Favourite Listed and Hashtag Numb KNeighbouraccuracy: 0.5423419129329521 recall: 0.39566797151066785 precision: 0.5851335818615482
+scores for Favourites Count KNeighbouraccuracy: 0.5032570702256116 recall: 0.5154898243343011 precision: 0.5089559553277244
+scores for Listed Count KNeighbouraccuracy: 0.5247855100095329 recall: 0.6000097346557237 precision: 0.5634737544690228
+scores for Hashtag Count KNeighbouraccuracy: 0.524944391483953 recall: 0.5616770479395601 precision: 0.5334904805076368
+scores for Favourite and Listed Accuracy KNeighbouraccuracy: 0.5495710200190658 recall: 0.47866019061642284 precision: 0.5600192765036746
+scores for Favourite and Hashtag Accuracy Kneighbouraccuracy: 0.5486177311725453 recall: 0.4972853643785113 precision: 0.5503285606987673
+scores for Listed Count and Hashtag Accuracy Kneighbouraccuracy: 0.5629965046075627 recall: 0.5378874634205624 precision: 0.5654791550452704
+scores for Favourite Listed and Hashtag Numb KNeighbouraccuracy: 0.5351922465840483 recall: 0.3598287153450206 precision: 0.583237162706996

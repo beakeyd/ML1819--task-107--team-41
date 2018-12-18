@@ -38,40 +38,30 @@ def normaliseData(x):
     scale=x.max(axis=0)
     return (x/scale, scale)  
 
-def plotAccuracy(favouritesAcc,listed_acc,description_acc,tweet_acc,name_acc,screen_name,nameDescAcc,nameTweetAcc,nameScreen,nameCreatedAt,tweetDesc,tweetNameDesc,boop,doop):
+def plotAccuracy(AllTweets,screenName,description,tweet_acc):
     plt.figure(figsize=(16, 16))
-    plt.subplot(2,1,1)
   
-    y = (favouritesAcc,listed_acc,description_acc,tweet_acc,name_acc,screen_name,nameDescAcc,nameTweetAcc)
+  
+    y = (AllTweets,screenName,description,tweet_acc)
 
-    X_axis = ['favourites', 'listed count', 'description', 'tweet', 'name', 'screen name', 'name+desc', 'name+tweet']
-
-    y_pos = np.arange(len(X_axis))
-
-    plt.bar(y_pos, y, align='center', alpha=0.5)
-    plt.xticks(y_pos, X_axis)
-    plt.ylabel('Accuracy')
-    plt.title('Accuracy of features')
-
-    plt.subplot(2,1,2)
-    y = (nameScreen,nameCreatedAt,tweetDesc,tweetNameDesc,boop,doop)
-
-    X_axis = ['name+screen', 'name+createdat', 'tweet+desc', 'tweet+name+desc', 'number hashtags', 'hashtag text']
+    X_axis = ['All Tweets ', 'Screen Name', 'Description', 'Tweet']
 
     y_pos = np.arange(len(X_axis))
 
     plt.bar(y_pos, y, align='center', alpha=0.5)
     plt.xticks(y_pos, X_axis)
     plt.ylabel('Accuracy')
-    plt.title('Accuracy of features')
-    graph = 'plots/Accuracy.png'
+    plt.title('Accuracy of features for Bayes')
+
+   
+    graph = 'plots/AccuracyBayes.png'
     plt.savefig(graph)
     plt.close()
     #plt.show()
 
 def plotHeatMap(graphName, clf, clist, interlist):
     plt.figure(figsize=(8, 8))
-    scores=clf.cv_results_['mean_test_score'].reshape(-1, 2).T
+    scores=clf.cv_results_['mean_test_score'].reshape(-1, 3).T
     heatmap=mglearn.tools.heatmap(scores, xlabel="C", ylabel="boop", cmap="viridis", fmt="%.3f", xticklabels=clist, yticklabels=interlist)
     plt.colorbar(heatmap)
     graph = 'plots/' + graphName+'HyperParam.png'
@@ -99,69 +89,18 @@ def plotPrecisionRecall(predictions, y, graphName):
     plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
           average_precision))
     plt.close()
-#nested vs non nested sklearn tutorial    
-def simpleFeature(X, y, name):
-    print("Model is " + name)
-    if(name=="hashtag num "):
-        X  = X.reshape(-1,1)
-    else:
-        (X, _) = normaliseData(X.reshape(-1,1))
-   
-    outerCV=KFold(n_splits=4, shuffle=True, random_state=21)
-    hyperparameters={
-            "C": [ .1, .5],
-            
-            
-            "intercept_scaling": [.1, .5]#,
-        
-        
-            #"tol": [1e-4, 1e-5, 1e-6]
-
-
-            }
-    clist=hyperparameters["C"]
-    interlist=hyperparameters["intercept_scaling"]
-    pipeline = Pipeline([('vect', CountVectorizer()),
-                    ('tfidf', TfidfTransformer()),
-                    ('clf', MultinomialNB()),
-   ])
-    cv = RepeatedKFold(n_splits=2, n_repeats=2)
-    clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
-    clf.fit(X, y)
-  
-   
-    accuracy=cross_val_score(clf, X.reshape(-1,1), y, cv=cv).mean()
-    recall=clf.score
-    print(recall)
-    recall=cross_val_score(clf, X.reshape(-1,1), y, cv=cv,scoring='recall').mean()
-    precision=cross_val_score(clf, X.reshape(-1,1), y, cv=cv,scoring='precision').mean()
-    predictions = cross_val_predict(clf, X, y, cv=outerCV)
-   
-    plotHeatMap(name, clf, clist, interlist)
-    plotPrecisionRecall(predictions, y, name)
-  
-    f=open("scores.txt", "a+")
-    f.write("scores for "+name)
-    #f.write("accuracy: "+str(np.mean(accuracy))+" recall: "+str(np.mean(recall))+" precision: "+str(np.mean(precision))+"\n")
-    f.close()
-
-  
-    #print(classification_report(y, predictions))
-    return accuracy
 
    
 def textClassification(X, y, name):
     # create a dataframe using texts and lables
     print("Model "+name)
     
-    outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
+    outerCV = KFold(n_splits=2, shuffle=True, random_state=21)
     
     hyperparameters={
-    "clf__alpha": [ .1, 1],
-    'tfidf__norm': ('l1', 'l2')#, 
-    #'tfidf__use_idf': (True, False),  
-    #'tfidf__sublinear_tf': (True, False)
-
+    "clf__alpha": [ .1,  1, 10],
+    'tfidf__norm': ('l1', 'l2') 
+    
     }
     alpha=hyperparameters["clf__alpha"]
     tfidf__norm=hyperparameters["tfidf__norm"]
@@ -181,22 +120,27 @@ def textClassification(X, y, name):
     print(precision)
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
    
-    plotHeatMap(name, clf, alpha, tfidf__norm)
+    #plotHeatMap(name, clf, alpha, tfidf__norm)
     plotPrecisionRecall(predictions, y, name)
+    f=open("scoresBayes.txt", "a+")
+    f.write("scores for "+name)
+    f.write(" accuracy: "+str(accuracy)+" recall: "+str(recall)+" precision: "+str(precision)+"\n")
+    f.close()
     return accuracy
 
 def main():
-    '''
+   
+    acc=0
     with open('data/twitter_tweets_no_unicode.json') as data:
         with open('data/gender.json') as gender_data:
+            
             data = json.load(data)
             gender_data = json.load(gender_data)
             gender_arr = []
             tweet_arr = []
         
             for key, value in data.items():
-                print(key)
-                
+            
                 for val in value:
                     tweet_arr.append(val)
                     if gender_data[key] == 'M':
@@ -213,11 +157,15 @@ def main():
                     male+=1
                 else:
                     fem+=1
-            tweet_acc = textClassification(tweet_arr, gender_arr, "Tweet")
-    '''
+            acc = textClassification(tweet_arr, gender_arr, "Tweet Bayes")
+            
+          
+ 
+ 
     
     with open('data/original_dataset_nounicode.json') as data:
         with open('data/gender.json') as gender_data:
+            
             data = json.load(data)
             gender_data = json.load(gender_data)
             gender_arr = []
@@ -236,6 +184,7 @@ def main():
             gender_arr=np.array(gender_arr)
             name_arr=np.array(name_arr)
             screen_name_arr=np.array(screen_name_arr)
+          
             description_arr=np.array(description_arr)
             male, fem=0, 0
             for d in gender_arr:
@@ -243,10 +192,10 @@ def main():
                     male+=1
                 else:
                     fem+=1
-            t = textClassification(screen_name_arr, gender_arr, "screen_name")
-            t = textClassification(name_arr, gender_arr, "name")
-            t = textClassification(description_arr, gender_arr, "description")
-
+            screenNameAcc = textClassification(screen_name_arr, gender_arr, "screen_name_Bayes")
+            genderNameAcc = textClassification(name_arr, gender_arr, "name_Bayes")
+            descriptionAcc = textClassification(description_arr, gender_arr, "description_bayes")
+    plotAccuracy(acc, screenNameAcc, genderNameAcc, descriptionAcc)
 if __name__ == '__main__':
    main()
 
