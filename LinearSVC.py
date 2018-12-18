@@ -98,7 +98,7 @@ def main():
                     male+=1
                 else:
                     fem+=1
-           # acc = textClassification(tweet_arr, gender_arr, "Tweet LinearSVC")
+            acc = textClassification(tweet_arr, gender_arr, "Tweet LinearSVC")
     with open('data/original_dataset_nounicode.json') as totalDataset,open('data/original_dataset_nounicode.json') as totalDataset1,open("data/numb_Hashtag.json") as numbHashtag,open("data/twitter_Hashtag.json") as hashTagTweet, open("data/gender.json") as genderData:
         
         totalDataset = json.load(totalDataset)
@@ -117,32 +117,32 @@ def main():
 
         #create models, plot and then get accuracy of models
         #created_at_acc = simpleFeature(created_at, gender, "Created At")
-        favouritesResults = simpleFeature(favourites_count, gender, "Favourites Count")
+        #favouritesResults = simpleFeature(favourites_count, gender, "Favourites Count")
         
-        listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
-        description_acc = textClassification(description, gender, "Description")
-        tweet_acc = textClassification(tweet, gender, "Tweet")
-        name_acc = textClassification(name, gender, "name")
-        screen_name = textClassification(name, gender, "Screen Name")
+        #listed_acc = simpleFeature(listed_count, gender, "Listed Count")   
+        #description_acc = textClassification(description, gender, "Description")
+        #tweet_acc = textClassification(tweet, gender, "Tweet")
+        #name_acc = textClassification(name, gender, "name")
+        #screen_name = textClassification(name, gender, "Screen Name")
 
         
         
         df.dropna(axis=0)
         df.set_index('id', inplace=True)
         df.head()
-        nameDescAcc=combinedFeatures("name", "description", df)
-        nameTweetAcc=combinedFeatures("name", "tweet", df)
-        nameScreen=combinedFeatures("name", "screen_name", df)
-        nameCreatedAt=combinedFeatures("name", "created_at", df)
-        tweetDesc=combinedFeatures("tweet", "description", df)
-        tweetNameDesc=combinedThreeTextFeatures("tweet", "name", "description", df)
-        numbHashtag=json.load(numbHashtag)
-        genderData=json.load(genderData)
-        hashtagTweet=json.load(hashTagTweet)
-        hashtagNumbAcc=hashtagNum(numbHashtag, genderData, "hashtag num ")
-        hashtagTextAcc=hashtagText(hashtagTweet, genderData, "hashtag text ")
+        #nameDescAcc=combinedFeatures("name", "description", df)
+        #nameTweetAcc=combinedFeatures("name", "tweet", df)
+        #nameScreen=combinedFeatures("name", "screen_name", df)
+        #nameCreatedAt=combinedFeatures("name", "created_at", df)
+        #tweetDesc=combinedFeatures("tweet", "description", df)
+        #tweetNameDesc=combinedThreeTextFeatures("tweet", "name", "description", df)
+        #numbHashtag=json.load(numbHashtag)
+        #genderData=json.load(genderData)
+        #hashtagTweet=json.load(hashTagTweet)
+        #hashtagNumbAcc=hashtagNum(numbHashtag, genderData, "hashtag num ")
+        #hashtagTextAcc=hashtagText(hashtagTweet, genderData, "hashtag text ")
         
-        plotAccuracy(favouritesResults, listed_acc, description_acc, tweet_acc, name_acc, screen_name, nameDescAcc, nameTweetAcc, nameScreen, nameCreatedAt, tweetDesc, tweetNameDesc, hashtagNumbAcc, hashtagTextAcc)
+        #plotAccuracy(favouritesResults, listed_acc, description_acc, tweet_acc, name_acc, screen_name, nameDescAcc, nameTweetAcc, nameScreen, nameCreatedAt, tweetDesc, tweetNameDesc, hashtagNumbAcc, hashtagTextAcc)
         
 
 def normaliseData(x):
@@ -341,7 +341,7 @@ def textClassification(X, y, name):
     print("Model "+name)
     
   
-    outerCV = KFold(n_splits=4, shuffle=True, random_state=21)
+    outerCV = KFold(n_splits=2, shuffle=True, random_state=21)
     vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
     
     X = vectorizer.fit_transform(X)
@@ -359,7 +359,7 @@ def textClassification(X, y, name):
             }
     clist=hyperparameters["C"]
     interlist=hyperparameters["intercept_scaling"]
-    cv = RepeatedKFold(n_splits=2, n_repeats=4)
+    cv = RepeatedKFold(n_splits=2, n_repeats=2)
     clf=GridSearchCV(estimator=model, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
     
@@ -370,7 +370,7 @@ def textClassification(X, y, name):
     precision =cross_val_score(clf, X=X, y=y, cv=cv, scoring="precision").mean()
     print(precision)
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
-   
+    
     plotHeatMap(name, clf, clist, interlist)
     plotPrecisionRecall(predictions, y, name)
     f=open("scoresLinearSVC.txt", "a+")
