@@ -140,7 +140,6 @@ def main():
             tweet_arr = []
         
             for key, value in data.items():
-            
                 for val in value:
                     tweet_arr.append(val)
                     if gender_data[key] == 'M':
@@ -157,11 +156,7 @@ def main():
                     male+=1
                 else:
                     fem+=1
-            #acc = textClassification(tweet_arr, gender_arr, "Tweet Bayes")
-            
-          
- 
- 
+            acc = textClassification(tweet_arr, gender_arr, "Tweet Bayes")
     
     with open('data/original_dataset_nounicode.json') as data:
         with open('data/gender.json') as gender_data:
@@ -193,11 +188,10 @@ def main():
                 else:
                     fem+=1
             screenNameAcc = textClassification(screen_name_arr, gender_arr, "screen_name_Bayes")
-            genderNameAcc = textClassification(name_arr, gender_arr, "name_Bayes")
+            nameAcc = textClassification(name_arr, gender_arr, "name_Bayes")
             descriptionAcc = textClassification(description_arr, gender_arr, "description_bayes")
-    plotAccuracy(acc, screenNameAcc, genderNameAcc, descriptionAcc)
+
+    plotAccuracy(acc, screenNameAcc, nameAcc, descriptionAcc)
+
 if __name__ == '__main__':
    main()
-
-
-
