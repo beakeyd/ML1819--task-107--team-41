@@ -95,7 +95,7 @@ def textClassification(X, y, name):
     # create a dataframe using texts and lables
     print("Model "+name)
     
-    outerCV = KFold(n_splits=2, shuffle=True, random_state=21)
+    outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
     
     hyperparameters={
     "clf__alpha": [ .1,  1, 10],
@@ -109,7 +109,7 @@ def textClassification(X, y, name):
                     ('clf', MultinomialNB()),
    ])
     
-    cv = RepeatedKFold(n_splits=2, n_repeats=2)
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
     clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
     accuracy = cross_val_score(clf, X=X, y=y, cv=cv ).mean()
@@ -157,7 +157,7 @@ def main():
                     male+=1
                 else:
                     fem+=1
-            acc = textClassification(tweet_arr, gender_arr, "Tweet Bayes")
+            #acc = textClassification(tweet_arr, gender_arr, "Tweet Bayes")
             
           
  

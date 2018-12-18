@@ -8,3 +8,6 @@ scores for name and descriptionaccuracy: 0.669256120527307 recall: 0.57749491185
 scores for name and tweetaccuracy: 0.6214689265536724 recall: 0.6125554997510886 precision: 0.6316651170244957
 scores for name and screen_nameaccuracy: 0.662586315128688 recall: 0.41643605402805567 precision: 0.8176937578287087
 scores for name and created_ataccuracy: 0.6665097300690521 recall: 0.4431173019753154 precision: 0.8126840982235297
+scores for Favourites Countaccuracy: 0.49868065379998155 recall: 0.5693850378893298 precision: 0.31078233880708567
+scores for Listed Countaccuracy: 0.5301813279157818 recall: 0.2159999829667718 precision: 0.6210716242605253
+scores for Descriptionaccuracy: 0.6120994243851388 recall: 0.48055199201803167 precision: 0.6552346788106521

@@ -141,7 +141,7 @@ def plotAccuracy(favouritesAcc,listed_acc,numberAcc,favouritesListedAcc,favourit
 
 def plotHeatMap(graphName, clf, clist, interlist):
     plt.figure(figsize=(8, 8))
-    scores=clf.cv_results_['mean_test_score'].reshape(-1, 5).T
+    scores=clf.cv_results_['mean_test_score'].reshape(-1, 4).T
     heatmap=mglearn.tools.heatmap(scores, xlabel="C", ylabel="boop", cmap="viridis", fmt="%.3f", xticklabels=clist, yticklabels=interlist)
     plt.colorbar(heatmap)
     graph = 'plots/' + graphName+'HyperParam.png'
@@ -180,14 +180,12 @@ def simpleFeature(X, y, name):
     else:
         (X, _) = normaliseData(X.reshape(-1,1))
    
-    outerCV=KFold(n_splits=4, shuffle=True, random_state=21)
+    outerCV=KFold(n_splits=10, shuffle=True, random_state=21)
     hyperparameters={
-        "n_neighbors": [ 1,5,10]
+        "n_neighbors": [ 1,5,10, 30]
         ,
         
-        "leaf_size": [10, 20, 30, 50],
-       
-        "p": [1,2]
+        "leaf_size": [10, 20, 30, 50]
       
       
 
@@ -196,7 +194,7 @@ def simpleFeature(X, y, name):
     neighbour=hyperparameters["n_neighbors"]
     leaflist=hyperparameters["leaf_size"]
     model = KNeighborsClassifier()
-    cv = RepeatedKFold(n_splits=2, n_repeats=2)
+    cv = RepeatedKFold(n_splits=10, n_repeats=5)
     clf=GridSearchCV(estimator=model, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
   
@@ -208,7 +206,7 @@ def simpleFeature(X, y, name):
     precision=cross_val_score(clf, X.reshape(-1,1), y, cv=cv,scoring='precision').mean()
     predictions = cross_val_predict(clf, X, y, cv=outerCV)
    
-    #plotHeatMap(name, clf, neighbour, leaflist)
+    plotHeatMap(name, clf, neighbour, leaflist)
     plotPrecisionRecall(predictions, y, name)
   
     f=open("scoresKNeighbour.txt", "a+")
@@ -279,18 +277,16 @@ def combinedFeatures(x1, x2, graphName,df):
         ),
     ])
     hyperparameters={
-        "classifier__n_neighbors": [ 1,5,10, 20, 30]
+        "classifier__n_neighbors": [ 1,5,10, 30]
         ,
         
-        "classifier__leaf_size": [10, 20, 30, 50, 70],
-       
-       "classifier__p": [1,2]
+        "classifier__leaf_size": [10, 20, 30, 50]
 
 
         }
     neighbours=hyperparameters["classifier__n_neighbors"]
     leafList=hyperparameters["classifier__leaf_size"]
-    cv = RepeatedKFold(n_splits=2, n_repeats=2)
+    cv = RepeatedKFold(n_splits=10, n_repeats=5)
     clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
     
@@ -305,7 +301,7 @@ def combinedFeatures(x1, x2, graphName,df):
     f.write("scores for "+graphName)
     f.write("accuracy: "+str(accuracy)+" recall: "+str(recall)+" precision: "+str(precision)+"\n")
     f.close()
-    #plotHeatMap(graphName, clf, neighbours, leafList)
+    plotHeatMap(graphName, clf, neighbours, leafList)
     plotPrecisionRecall(predictions, y, graphName)
     
     return accuracy
@@ -373,7 +369,7 @@ def combinedThreeFeatures(x1, x2, x3,graphName, df):
         }
     clist=hyperparameters["classifier__C"]
     interlist=hyperparameters["classifier__intercept_scaling"]
-    cv = RepeatedKFold(n_splits=2, n_repeats=2)
+    cv = RepeatedKFold(n_splits=10, n_repeats=5)
     clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
     

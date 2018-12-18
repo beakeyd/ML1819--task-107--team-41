@@ -12,3 +12,4 @@ scores for Favourite and Listed Accuracy KNeighbouraccuracy: 0.5495710200190658 
 scores for Favourite and Hashtag Accuracy Kneighbouraccuracy: 0.5486177311725453 recall: 0.4972853643785113 precision: 0.5503285606987673
 scores for Listed Count and Hashtag Accuracy Kneighbouraccuracy: 0.5629965046075627 recall: 0.5378874634205624 precision: 0.5654791550452704
 scores for Favourite Listed and Hashtag Numb KNeighbouraccuracy: 0.5351922465840483 recall: 0.3598287153450206 precision: 0.583237162706996
+scores for Favourites Count KNeighbouraccuracy: 0.5036224398953923 recall: 0.41179607234609383 precision: 0.5084069365223169

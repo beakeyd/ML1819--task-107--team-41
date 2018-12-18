@@ -296,7 +296,7 @@ def simpleFeature(X, y, name):
     else:
         (X, _) = normaliseData(X.reshape(-1,1))
    
-    outerCV=KFold(n_splits=4, shuffle=True, random_state=21)
+    outerCV=KFold(n_splits=10, shuffle=True, random_state=21)
     hyperparameters={
             "C": [ .1, .5, 1, 10],
             
@@ -311,7 +311,7 @@ def simpleFeature(X, y, name):
     clist=hyperparameters["C"]
     interlist=hyperparameters["intercept_scaling"]
     model = LinearSVC(random_state=42 )
-    cv = RepeatedKFold(n_splits=2, n_repeats=4)
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
     clf=GridSearchCV(estimator=model, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
   
@@ -341,7 +341,7 @@ def textClassification(X, y, name):
     print("Model "+name)
     
   
-    outerCV = KFold(n_splits=4, shuffle=True, random_state=21)
+    outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
     vectorizer = CountVectorizer(stop_words='english', max_df=0.2)
     
     X = vectorizer.fit_transform(X)
@@ -359,7 +359,7 @@ def textClassification(X, y, name):
             }
     clist=hyperparameters["C"]
     interlist=hyperparameters["intercept_scaling"]
-    cv = RepeatedKFold(n_splits=2, n_repeats=4)
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
     clf=GridSearchCV(estimator=model, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
     
@@ -387,7 +387,7 @@ def combinedFeatures(x1, x2,df):
     
 
   
-    outerCV = KFold(n_splits=4, shuffle=True, random_state=21)
+    outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
     name=x1+" and "+x2
     graphName=(str(x1+" and "+x2))    
     features= [c for c in df.columns.values if c   in [x1,x2]]
@@ -448,7 +448,7 @@ def combinedFeatures(x1, x2,df):
         }
     clist=hyperparameters["classifier__C"]
     interlist=hyperparameters["classifier__intercept_scaling"]
-    cv = RepeatedKFold(n_splits=2, n_repeats=4)
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
     clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
     
@@ -477,7 +477,7 @@ def combinedFeatures(x1, x2,df):
 def combinedThreeTextFeatures(x1, x2, x3,df):
     print(x1+" and "+x2+" and "+x3)
     graphName=(str(x1+" and "+x2+" and "+x3))
-    outerCV = KFold(n_splits=4, shuffle=True, random_state=21)
+    outerCV = KFold(n_splits=10, shuffle=True, random_state=21)
     features= [c for c in df.columns.values if c   in [x1,x2]]
     
     target='gender'
@@ -528,7 +528,7 @@ def combinedThreeTextFeatures(x1, x2, x3,df):
         }
     clist=hyperparameters["classifier__C"]
     interlist=hyperparameters["classifier__intercept_scaling"]
-    cv = RepeatedKFold(n_splits=2, n_repeats=4)
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
     clf=GridSearchCV(estimator=pipeline, param_grid=hyperparameters, cv=cv)
     clf.fit(X, y)
     
